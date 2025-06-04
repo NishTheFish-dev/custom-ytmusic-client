@@ -1,18 +1,24 @@
 :root {
+  --text-base: #fff;
+  --text-subdued: #a7a7a7;
   --background-base: #121212;
   --background-highlight: #1a1a1a;
   --background-press: #000;
   --background-elevated-base: #242424;
   --background-tinted-base: hsla(0,0%,100%,.07);
   --background-tinted-highlight: hsla(0,0%,100%,.1);
-  --text-base: #fff;
-  --text-subdued: #a7a7a7;
-  --text-bright-accent: #1ed760;
   --essential-base: #fff;
   --essential-subdued: #727272;
   --essential-bright-accent: #1ed760;
+  --essential-negative: #e91429;
+  --essential-warning: #ffa42b;
+  --essential-positive: #1ed760;
+  --essential-announcement: #0d72ea;
   --decorative-base: #fff;
   --decorative-subdued: #292929;
+  --sidebar-width: 240px;
+  --topbar-height: 64px;
+  --player-height: 90px;
 }
 
 * {
@@ -31,6 +37,9 @@ body {
   background-color: var(--background-base);
   color: var(--text-base);
   overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 code {
@@ -47,7 +56,7 @@ code {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--background-elevated-base);
+  background: var(--background-tinted-base);
   border-radius: 6px;
 }
 
@@ -55,9 +64,69 @@ code {
   background: var(--background-tinted-highlight);
 }
 
+/* Layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--background-base);
+  color: var(--text-base);
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--background-base);
+  border-right: 1px solid var(--background-tinted-base);
+  padding: 24px 12px;
+  overflow-y: auto;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+}
+
+.topbar {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: var(--topbar-height);
+  background-color: var(--background-base);
+  border-bottom: 1px solid var(--background-tinted-base);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 100;
+}
+
+.player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--player-height);
+  background-color: var(--background-elevated-base);
+  border-top: 1px solid var(--background-tinted-base);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Material-UI Overrides */
 .MuiDrawer-paper {
   background-color: var(--background-base) !important;
   border-right: 1px solid var(--background-tinted-base) !important;
+  width: var(--sidebar-width) !important;
 }
 
 .MuiAppBar-root {
@@ -68,6 +137,9 @@ code {
 .MuiListItem-root {
   color: var(--text-subdued) !important;
   transition: color 0.2s ease-in-out !important;
+  border-radius: 4px !important;
+  margin: 4px 0 !important;
+  padding: 8px 16px !important;
 }
 
 .MuiListItem-root:hover {
@@ -77,29 +149,59 @@ code {
 
 .MuiListItemIcon-root {
   color: inherit !important;
+  min-width: 32px !important;
 }
 
 .MuiTypography-root {
-  color: var(--text-base) !important;
+  color: var(--text-base);
 }
 
-.main-content {
-  background-color: var(--background-base);
-  min-height: 100vh;
-  padding: 24px;
+.MuiTypography-body2 {
+  color: var(--text-subdued);
 }
 
+/* Cards and Content */
 .card {
   background-color: var(--background-elevated-base);
   border-radius: 8px;
   padding: 16px;
   transition: background-color 0.2s ease-in-out;
+  cursor: pointer;
 }
 
 .card:hover {
   background-color: var(--background-tinted-base);
 }
 
+.track-card {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.track-card:hover {
+  background-color: var(--background-tinted-base);
+}
+
+.track-info {
+  margin-left: 12px;
+  flex: 1;
+}
+
+.track-title {
+  color: var(--text-base);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.track-artist {
+  color: var(--text-subdued);
+  font-size: 0.875rem;
+}
+
+/* Buttons and Controls */
 .button {
   background-color: var(--essential-bright-accent);
   color: var(--background-base);
@@ -115,6 +217,34 @@ code {
   transform: scale(1.04);
 }
 
+.control-button {
+  color: var(--text-subdued);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease-in-out;
+}
+
+.control-button:hover {
+  color: var(--text-base);
+  background-color: var(--background-tinted-base);
+}
+
+.play-button {
+  color: var(--text-base);
+  background-color: var(--essential-bright-accent);
+  width: 32px;
+  height: 32px;
+}
+
+.play-button:hover {
+  transform: scale(1.04);
+  background-color: var(--essential-bright-accent);
+}
+
+/* Input Fields */
 .input {
   background-color: var(--background-tinted-base);
   border: none;
@@ -122,9 +252,91 @@ code {
   color: var(--text-base);
   padding: 8px 12px;
   width: 100%;
+  transition: background-color 0.2s ease-in-out;
 }
 
 .input:focus {
   outline: none;
   background-color: var(--background-tinted-highlight);
+}
+
+/* Player Controls */
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 4px;
+  background-color: var(--background-tinted-base);
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+}
+
+.progress-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background-color: var(--essential-bright-accent);
+  border-radius: 2px;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 125px;
+}
+
+/* Search Bar */
+.search-bar {
+  background-color: var(--background-tinted-base);
+  border-radius: 20px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 300px;
+}
+
+.search-bar input {
+  background: none;
+  border: none;
+  color: var(--text-base);
+  width: 100%;
+}
+
+.search-bar input:focus {
+  outline: none;
+}
+
+/* Grid Layout */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 24px;
+  padding: 24px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+  
+  .sidebar {
+    display: none;
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .topbar {
+    left: 0;
+  }
 } 

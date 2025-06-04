@@ -1,63 +1,565 @@
-const { app, BrowserWindow } = require('electron');
+require('dotenv').config();
+const { app, BrowserWindow, ipcMain, protocol, shell } = require('electron');
 const path = require('path');
-const isDev = process.env.NODE_ENV !== 'production';
+const fs = require('fs');
+const { google } = require('googleapis');
+const Store = require('electron-store');
+const http = require('http');
+const isDev = process.env.NODE_ENV === 'development';
+
+// Add electron path resolution
+const pathFile = path.join(__dirname, 'path.txt');
+
+function getElectronPath() {
+    let executablePath;
+    if (fs.existsSync(pathFile)) {
+        executablePath = fs.readFileSync(pathFile, 'utf-8');
+    }
+    if (process.env.ELECTRON_OVERRIDE_DIST_PATH) {
+        return path.join(process.env.ELECTRON_OVERRIDE_DIST_PATH, executablePath || 'electron');
+    }
+    if (executablePath) {
+        return path.join(__dirname, 'dist', executablePath);
+    } else {
+        throw new Error('Electron failed to install correctly, please delete node_modules/electron and try installing again');
+    }
+}
+
+// Add IPC handler for environment variables
+ipcMain.handle('get-env', () => {
+  // Only expose necessary environment variables
+  return {
+    NODE_ENV: process.env.NODE_ENV,
+    ELECTRON: true
+  };
+});
+
+const store = new Store({
+  name: 'auth',
+  encryptionKey: 'your-encryption-key'
+});
+
+// Create a separate store for playlists
+const playlistStore = new Store({
+  name: 'playlists',
+  encryptionKey: 'your-encryption-key'
+});
 
 let mainWindow = null;
+const OAUTH_PORT = 51732; // You can use any free port
+
+// Initialize YouTube API
+const oauth2Client = new google.auth.OAuth2(
+  process.env.YOUTUBE_CLIENT_ID,
+  process.env.YOUTUBE_CLIENT_SECRET,
+  `http://localhost:${OAUTH_PORT}`
+);
+
+const youtube = google.youtube('v3');
+
+// Check for existing tokens
+const tokens = store.get('tokens');
+if (tokens) {
+  oauth2Client.setCredentials(tokens);
+}
+
+// Helper: Start a local server to listen for the OAuth callback
+function listenForAuthCode() {
+  return new Promise((resolve, reject) => {
+    const server = http.createServer((req, res) => {
+      const url = new URL(req.url, `http://localhost:${OAUTH_PORT}`);
+      const code = url.searchParams.get('code');
+      if (code) {
+        res.end('Authentication successful! You can close this window.');
+        server.close();
+        resolve(code);
+      } else {
+        res.end('No code found.');
+      }
+    });
+    server.listen(OAUTH_PORT);
+  });
+}
+
+// IPC handler to start OAuth flow
+ipcMain.handle('youtube:getAuthUrl', async () => {
+  try {
+    if (!process.env.YOUTUBE_CLIENT_ID || !process.env.YOUTUBE_CLIENT_SECRET) {
+      throw new Error('YouTube API credentials are not configured. Please check your .env file.');
+    }
+
+    const authUrl = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: [
+        'https://www.googleapis.com/auth/youtube.readonly',
+        'https://www.googleapis.com/auth/youtube.force-ssl'
+      ],
+      prompt: 'consent',
+      response_type: 'code',
+      include_granted_scopes: true
+    });
+
+    // Dynamically import and use the open package
+    const open = (await import('open')).default;
+    await open(authUrl);
+
+    // Wait for the code from the local server
+    const code = await listenForAuthCode();
+    
+    // Get tokens directly
+    const { tokens } = await oauth2Client.getToken(code);
+    store.set('tokens', tokens);
+    oauth2Client.setCredentials(tokens);
+    
+    // Get user info
+    const youtube = google.youtube('v3');
+    const response = await youtube.channels.list({
+      auth: oauth2Client,
+      part: 'snippet',
+      mine: true
+    });
+
+    const userInfo = response.data.items[0].snippet;
+    const user = {
+      ...userInfo,
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
+      expiryDate: tokens.expiry_date
+    };
+
+    store.set('user', user);
+    
+    // Send the auth success event to the renderer
+    if (mainWindow) {
+      mainWindow.webContents.send('auth-success', { user, tokens });
+    }
+    
+    return { user, tokens };
+  } catch (error) {
+    console.error('Error during OAuth:', error);
+    throw new Error(`Failed to start authentication process: ${error.message}`);
+  }
+});
+
+ipcMain.handle('youtube:getTokens', async (event, code) => {
+  try {
+    const { tokens } = await oauth2Client.getToken(code);
+    store.set('tokens', tokens);
+    oauth2Client.setCredentials(tokens);
+    return tokens;
+  } catch (error) {
+    console.error('Error getting tokens:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('youtube:searchVideos', async (event, { query, maxResults }) => {
+  try {
+    const response = await youtube.search.list({
+      auth: oauth2Client,
+      part: 'snippet',
+      q: query,
+      maxResults,
+      type: 'video',
+      videoCategoryId: '10'
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error searching videos:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('youtube:getVideoDetails', async (event, videoId) => {
+  try {
+    const response = await youtube.videos.list({
+      auth: oauth2Client,
+      part: 'snippet,contentDetails,statistics',
+      id: videoId
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error getting video details:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('youtube:getUserPlaylists', async () => {
+  try {
+    const response = await youtube.playlists.list({
+      auth: oauth2Client,
+      part: 'snippet,contentDetails',
+      mine: true,
+      maxResults: 50
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error getting user playlists:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('youtube:getPlaylistItems', async (event, playlistId) => {
+  try {
+    const response = await youtube.playlistItems.list({
+      auth: oauth2Client,
+      part: 'snippet,contentDetails',
+      playlistId,
+      maxResults: 50
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error getting playlist items:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('youtube:isAuthenticated', async () => {
+  try {
+    const tokens = store.get('tokens');
+    return !!tokens;
+  } catch (error) {
+    console.error('Error checking authentication status:', error);
+    return false;
+  }
+});
+
+// Auth IPC handlers
+ipcMain.handle('auth:getStoredUser', async () => {
+  try {
+    const user = store.get('user');
+    return user || null;
+  } catch (error) {
+    console.error('Error getting stored user:', error);
+    return null;
+  }
+});
+
+ipcMain.handle('auth:login', async () => {
+  try {
+    const authUrl = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: [
+        'https://www.googleapis.com/auth/youtube',
+        'https://www.googleapis.com/auth/youtube.force-ssl',
+        'https://www.googleapis.com/auth/youtube.readonly'
+      ]
+    });
+
+    const open = (await import('open')).default;
+    await open(authUrl);
+
+    const code = await listenForAuthCode();
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+    const youtube = google.youtube('v3');
+    const response = await youtube.channels.list({
+      auth: oauth2Client,
+      part: 'snippet',
+      mine: true
+    });
+
+    const userInfo = response.data.items[0].snippet;
+    const user = {
+      ...userInfo,
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
+      expiryDate: tokens.expiry_date
+    };
+
+    store.set('user', user);
+    store.set('tokens', tokens);
+
+    // Send the auth success event to the renderer
+    if (mainWindow) {
+      mainWindow.webContents.send('auth-success', { user, tokens });
+    }
+
+    return user;
+  } catch (error) {
+    console.error('Error during login:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('auth:logout', async () => {
+  try {
+    const user = store.get('user');
+    if (user?.accessToken) {
+      await oauth2Client.revokeToken(user.accessToken);
+    }
+    store.delete('user');
+    store.delete('tokens');
+    return true;
+  } catch (error) {
+    console.error('Error during logout:', error);
+    return false;
+  }
+});
+
+ipcMain.handle('auth:refreshAccessToken', async () => {
+  try {
+    const { credentials } = await oauth2Client.refreshAccessToken();
+    const user = store.get('user');
+    const updatedUser = {
+      ...user,
+      accessToken: credentials.access_token,
+      expiryDate: credentials.expiry_date
+    };
+    store.set('user', updatedUser);
+    return updatedUser;
+  } catch (error) {
+    console.error('Error refreshing access token:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('auth:getUserInfo', async () => {
+  try {
+    const youtube = google.youtube('v3');
+    const response = await youtube.channels.list({
+      auth: oauth2Client,
+      part: 'snippet',
+      mine: true
+    });
+    return response.data.items[0].snippet;
+  } catch (error) {
+    console.error('Error getting user info:', error);
+    throw error;
+  }
+});
+
+// Playlist IPC handlers
+ipcMain.handle('playlist:getStoredPlaylists', async () => {
+  try {
+    const playlists = playlistStore.get('playlists');
+    return playlists || [];
+  } catch (error) {
+    console.error('Error getting stored playlists:', error);
+    return [];
+  }
+});
+
+ipcMain.handle('playlist:savePlaylists', async (event, playlists) => {
+  try {
+    playlistStore.set('playlists', playlists);
+    return true;
+  } catch (error) {
+    console.error('Error saving playlists:', error);
+    return false;
+  }
+});
+
+ipcMain.handle('playlist:create', async (event, { name, description, isPrivate }) => {
+  try {
+    const response = await youtube.playlists.insert({
+      auth: oauth2Client,
+      part: 'snippet,status',
+      requestBody: {
+        snippet: {
+          title: name,
+          description: description
+        },
+        status: {
+          privacyStatus: isPrivate ? 'private' : 'public'
+        }
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating playlist:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('playlist:delete', async (event, playlistId) => {
+  try {
+    await youtube.playlists.delete({
+      auth: oauth2Client,
+      id: playlistId
+    });
+    return true;
+  } catch (error) {
+    console.error('Error deleting playlist:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('playlist:addTrack', async (event, { playlistId, trackId }) => {
+  try {
+    const response = await youtube.playlistItems.insert({
+      auth: oauth2Client,
+      part: 'snippet',
+      requestBody: {
+        snippet: {
+          playlistId: playlistId,
+          resourceId: {
+            kind: 'youtube#video',
+            videoId: trackId
+          }
+        }
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding track to playlist:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('playlist:removeTrack', async (event, { playlistId, trackId }) => {
+  try {
+    // First, get the playlist item ID
+    const response = await youtube.playlistItems.list({
+      auth: oauth2Client,
+      part: 'id',
+      playlistId: playlistId,
+      videoId: trackId
+    });
+
+    if (response.data.items.length > 0) {
+      await youtube.playlistItems.delete({
+        auth: oauth2Client,
+        id: response.data.items[0].id
+      });
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Error removing track from playlist:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('playlist:update', async (event, { playlistId, name, description, isPrivate }) => {
+  try {
+    const response = await youtube.playlists.update({
+      auth: oauth2Client,
+      part: 'snippet,status',
+      requestBody: {
+        id: playlistId,
+        snippet: {
+          title: name,
+          description: description
+        },
+        status: {
+          privacyStatus: isPrivate ? 'private' : 'public'
+        }
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating playlist:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('playlist:reorder', async (event, { playlistId, trackIds }) => {
+  try {
+    // Get current playlist items
+    const response = await youtube.playlistItems.list({
+      auth: oauth2Client,
+      part: 'id,snippet',
+      playlistId: playlistId,
+      maxResults: 50
+    });
+
+    const items = response.data.items;
+    const updates = [];
+
+    // Update positions for each item
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const newPosition = trackIds.indexOf(item.snippet.resourceId.videoId);
+      if (newPosition !== -1) {
+        updates.push(
+          youtube.playlistItems.update({
+            auth: oauth2Client,
+            part: 'snippet',
+            requestBody: {
+              id: item.id,
+              snippet: {
+                playlistId: playlistId,
+                resourceId: {
+                  kind: 'youtube#video',
+                  videoId: item.snippet.resourceId.videoId
+                },
+                position: newPosition
+              }
+            }
+          })
+        );
+      }
+    }
+
+    // Execute all updates
+    await Promise.all(updates);
+    return true;
+  } catch (error) {
+    console.error('Error reordering playlist:', error);
+    throw error;
+  }
+});
 
 function createWindow() {
-  // Create the browser window.
+  const preloadPath = isDev 
+    ? path.join(__dirname, 'preload.js')
+    : path.join(process.resourcesPath, 'preload.js');
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      webSecurity: false,
-      devTools: isDev
-    }
+      nodeIntegration: false,
+      contextIsolation: true,
+      webSecurity: true,
+      sandbox: true,
+      preload: preloadPath,
+      enableRemoteModule: false
+    },
+    show: false
   });
 
-  // Load the React app
-  const startUrl = isDev
-    ? 'http://127.0.0.1:3001'
-    : `file://${path.join(__dirname, 'dist/index.html')}`;
+  // Log the preload script path for debugging
+  console.log('Preload script path:', preloadPath);
 
-  console.log('Loading URL:', startUrl);
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:3001');
+    mainWindow.webContents.openDevTools();
+  } else {
+    mainWindow.loadFile(path.join(__dirname, 'dist', 'index.html'));
+  }
 
-  mainWindow.loadURL(startUrl).catch(err => {
-    console.error('Failed to load URL:', err);
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
   });
 
-  // Handle window state
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-
-  // Log any console messages from the renderer process
-  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
-    console.log('Renderer Console:', message);
-  });
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
+// Register custom protocol
 app.whenReady().then(() => {
+  protocol.registerHttpProtocol('ytmusic', (request) => {
+    const url = new URL(request.url);
+    const code = url.searchParams.get('code');
+    
+    if (code && mainWindow) {
+      mainWindow.webContents.send('oauth-callback', code);
+    }
+  });
+
   createWindow();
 
-  app.on('activate', () => {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
+  app.on('activate', function () {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
-// Quit when all windows are closed, except on macOS.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+app.on('window-all-closed', function () {
+  if (process.platform !== 'darwin') app.quit();
 });
 
 // Handle any uncaught exceptions

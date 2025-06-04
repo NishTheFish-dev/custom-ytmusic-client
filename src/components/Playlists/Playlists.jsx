@@ -1,0 +1,109 @@
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, CircularProgress } from '@mui/material';
+import AlbumGrid from '../Grid/AlbumGrid';
+import { playlistService } from '../../services/PlaylistService';
+
+const Playlists = ({ onPlaylistClick, onPlayClick }) => {
+  const [playlists, setPlaylists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    loadPlaylists();
+  }, []);
+
+  const loadPlaylists = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await playlistService.getUserPlaylists();
+      setPlaylists(data);
+    } catch (err) {
+      setError('Failed to load playlists');
+      console.error('Error loading playlists:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100%',
+          padding: 4,
+        }}
+      >
+        <CircularProgress sx={{ color: 'var(--text-base)' }} />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100%',
+          padding: 4,
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            color: 'var(--text-subdued)',
+            textAlign: 'center',
+          }}
+        >
+          {error}
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ padding: 3 }}>
+      <Typography
+        variant="h4"
+        sx={{
+          color: 'var(--text-base)',
+          marginBottom: 3,
+          fontWeight: 700,
+        }}
+      >
+        Your Playlists
+      </Typography>
+
+      {playlists.length === 0 ? (
+        <Typography
+          variant="body1"
+          sx={{
+            color: 'var(--text-subdued)',
+            textAlign: 'center',
+            marginTop: 4,
+          }}
+        >
+          No playlists found. Create your first playlist on YouTube Music!
+        </Typography>
+      ) : (
+        <AlbumGrid
+          items={playlists.map(playlist => ({
+            id: playlist.id,
+            title: playlist.title,
+            subtitle: `${playlist.itemCount} songs • ${playlist.channelTitle}`,
+            thumbnail: playlist.thumbnail,
+          }))}
+          onItemClick={onPlaylistClick}
+          onPlayClick={onPlayClick}
+        />
+      )}
+    </Box>
+  );
+};
+
+export default Playlists; 

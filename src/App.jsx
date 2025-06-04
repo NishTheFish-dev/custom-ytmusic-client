@@ -1,156 +1,227 @@
-import React from 'react';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import React, { useState, useEffect } from 'react';
+import { ThemeProvider, createTheme } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import Drawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import HomeIcon from '@mui/icons-material/Home';
-import SearchIcon from '@mui/icons-material/Search';
-import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
-import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import SettingsIcon from '@mui/icons-material/Settings';
-import Divider from '@mui/material/Divider';
+import AuthComponent from './components/Auth/AuthComponent';
+import Sidebar from './components/Layout/Sidebar';
+import Player from './components/Player/Player';
+import QueuePanel from './components/Queue/QueuePanel';
+import UserProfile from './components/User/UserProfile';
+import Playlists from './components/Playlists/Playlists';
+import PlaylistTracks from './components/Playlists/PlaylistTracks';
+import { youtubeApi } from './services/youtubeApi';
+import './index.css';
 
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#ff0000',
+      main: '#1DB954',
     },
     background: {
       default: '#121212',
-      paper: '#1e1e1e',
+      paper: '#181818',
     },
   },
 });
 
 function App() {
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentView, setCurrentView] = useState('home');
+  const [currentTrack, setCurrentTrack] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [volume, setVolume] = useState(100);
+  const [showQueue, setShowQueue] = useState(false);
+  const [queue, setQueue] = useState([]);
+  const [user, setUser] = useState(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const toggleDrawer = (open) => (event) => {
-    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-      return;
-    }
-    setDrawerOpen(open);
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const authStatus = await youtubeApi.isAuthenticated();
+        setIsAuthenticated(authStatus);
+        if (authStatus) {
+          setUser({
+            name: 'User',
+            avatar: 'https://via.placeholder.com/40',
+          });
+        }
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  const handleAuthSuccess = () => {
+    setIsAuthenticated(true);
   };
 
-  const mainMenuItems = [
-    { text: 'Home', icon: <HomeIcon /> },
-    { text: 'Search', icon: <SearchIcon /> },
-    { text: 'Your Library', icon: <LibraryMusicIcon /> },
-  ];
+  const handlePlayPause = () => {
+    setIsPlaying(!isPlaying);
+  };
 
-  const libraryMenuItems = [
-    { text: 'Create Playlist', icon: <PlaylistPlayIcon /> },
-    { text: 'Liked Songs', icon: <FavoriteIcon /> },
-  ];
+  const handlePrevious = () => {
+    // TODO: Implement previous track logic
+  };
 
-  const bottomMenuItems = [
-    { text: 'Settings', icon: <SettingsIcon /> },
-  ];
+  const handleNext = () => {
+    // TODO: Implement next track logic
+  };
+
+  const handleSeek = (value) => {
+    setProgress(value);
+  };
+
+  const handleVolumeChange = (value) => {
+    setVolume(value);
+  };
+
+  const handleToggleQueue = () => {
+    setShowQueue(!showQueue);
+  };
+
+  const handleToggleMiniPlayer = () => {
+    // TODO: Implement mini player logic
+  };
+
+  const handleTrackPlay = (track) => {
+    setCurrentTrack(track);
+    setIsPlaying(true);
+  };
+
+  const handleTrackRemove = (track) => {
+    setQueue(queue.filter(t => t.id !== track.id));
+  };
+
+  const handlePlaylistClick = (playlist) => {
+    setSelectedPlaylist(playlist);
+    setCurrentView('playlist');
+  };
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'home':
+        return <Box sx={{ p: 3 }}>Home Content</Box>;
+      case 'search':
+        return <Box sx={{ p: 3 }}>Search Content</Box>;
+      case 'library':
+        return <Playlists onPlaylistClick={handlePlaylistClick} onPlayClick={handleTrackPlay} />;
+      case 'playlist':
+        return selectedPlaylist ? (
+          <Box sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <img
+                src={selectedPlaylist.thumbnail}
+                alt={selectedPlaylist.title}
+                style={{
+                  width: 232,
+                  height: 232,
+                  objectFit: 'cover',
+                  marginRight: 24,
+                }}
+              />
+              <Box>
+                <Typography variant="h4" sx={{ color: 'var(--text-base)', mb: 1 }}>
+                  {selectedPlaylist.title}
+                </Typography>
+                <Typography sx={{ color: 'var(--text-subdued)', mb: 2 }}>
+                  {selectedPlaylist.description}
+                </Typography>
+                <Typography sx={{ color: 'var(--text-subdued)' }}>
+                  {selectedPlaylist.itemCount} songs
+                </Typography>
+              </Box>
+            </Box>
+            <PlaylistTracks
+              playlist={selectedPlaylist}
+              onPlayClick={handleTrackPlay}
+            />
+          </Box>
+        ) : null;
+      default:
+        return <Box sx={{ p: 3 }}>Home Content</Box>;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+            backgroundColor: '#121212',
+          }}
+        >
+          <Typography variant="h6" sx={{ color: '#fff' }}>
+            Loading...
+          </Typography>
+        </Box>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Box sx={{ display: 'flex' }}>
-        <AppBar position="fixed" elevation={0}>
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={toggleDrawer(true)}
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" noWrap component="div">
-              YouTube Music Desktop
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        <Drawer
-          anchor="left"
-          open={drawerOpen}
-          onClose={toggleDrawer(false)}
-          variant="persistent"
-          sx={{
-            width: 240,
-            flexShrink: 0,
-            '& .MuiDrawer-paper': {
-              width: 240,
-              boxSizing: 'border-box',
-            },
-          }}
-        >
-          <Toolbar />
-          <Box
-            sx={{ width: 240 }}
-            role="presentation"
-            onClick={toggleDrawer(false)}
-            onKeyDown={toggleDrawer(false)}
-          >
-            <List>
-              {mainMenuItems.map((item) => (
-                <ListItem button key={item.text}>
-                  <ListItemIcon>
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItem>
-              ))}
-            </List>
-            <Divider sx={{ my: 2 }} />
-            <List>
-              {libraryMenuItems.map((item) => (
-                <ListItem button key={item.text}>
-                  <ListItemIcon>
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItem>
-              ))}
-            </List>
-            <Box sx={{ flexGrow: 1 }} />
-            <Divider sx={{ my: 2 }} />
-            <List>
-              {bottomMenuItems.map((item) => (
-                <ListItem button key={item.text}>
-                  <ListItemIcon>
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-        </Drawer>
-        <Box
-          component="main"
-          className="main-content"
-          sx={{
-            flexGrow: 1,
-            p: 3,
-            width: '100%',
-            height: '100vh',
-            marginTop: '64px',
-          }}
-        >
-          {/* Main content will go here */}
-          <Typography variant="h4" component="h1" gutterBottom>
-            Welcome to YouTube Music Desktop
-          </Typography>
-        </Box>
-      </Box>
+      <div className="app-container">
+        {!isAuthenticated ? (
+          <AuthComponent onAuthSuccess={handleAuthSuccess} />
+        ) : (
+          <>
+            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+              <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
+              
+              <div className="main-content">
+                <div className="topbar">
+                  {/* TODO: Add search bar and navigation controls */}
+                </div>
+                
+                <div className="content">
+                  {renderContent()}
+                </div>
+              </div>
+            </div>
+
+            {showQueue && (
+              <QueuePanel
+                queue={queue}
+                currentTrack={currentTrack}
+                onTrackClick={handleTrackPlay}
+                onTrackPlay={handleTrackPlay}
+                onTrackRemove={handleTrackRemove}
+              />
+            )}
+
+            <Player
+              currentTrack={currentTrack}
+              isPlaying={isPlaying}
+              progress={progress}
+              volume={volume}
+              onPlayPause={handlePlayPause}
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              onSeek={handleSeek}
+              onVolumeChange={handleVolumeChange}
+              onToggleQueue={handleToggleQueue}
+              onToggleMiniPlayer={handleToggleMiniPlayer}
+            />
+
+            <UserProfile user={user} onLogout={() => setIsAuthenticated(false)} />
+          </>
+        )}
+      </div>
     </ThemeProvider>
   );
 }
