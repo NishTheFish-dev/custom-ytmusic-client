@@ -1,2 +1,3 @@
-# custom-ytmusic-client
-A custom YouTube Music Client
+# YouTube Music Desktop Client
+
+A custom desktop client for YouTube Music built with React and Electron.

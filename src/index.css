@@ -1,0 +1,130 @@
+:root {
+  --background-base: #121212;
+  --background-highlight: #1a1a1a;
+  --background-press: #000;
+  --background-elevated-base: #242424;
+  --background-tinted-base: hsla(0,0%,100%,.07);
+  --background-tinted-highlight: hsla(0,0%,100%,.1);
+  --text-base: #fff;
+  --text-subdued: #a7a7a7;
+  --text-bright-accent: #1ed760;
+  --essential-base: #fff;
+  --essential-subdued: #727272;
+  --essential-bright-accent: #1ed760;
+  --decorative-base: #fff;
+  --decorative-subdued: #292929;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background-base);
+  color: var(--text-base);
+  overflow: hidden;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--background-elevated-base);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--background-tinted-highlight);
+}
+
+.MuiDrawer-paper {
+  background-color: var(--background-base) !important;
+  border-right: 1px solid var(--background-tinted-base) !important;
+}
+
+.MuiAppBar-root {
+  background-color: var(--background-base) !important;
+  border-bottom: 1px solid var(--background-tinted-base) !important;
+}
+
+.MuiListItem-root {
+  color: var(--text-subdued) !important;
+  transition: color 0.2s ease-in-out !important;
+}
+
+.MuiListItem-root:hover {
+  color: var(--text-base) !important;
+  background-color: var(--background-tinted-base) !important;
+}
+
+.MuiListItemIcon-root {
+  color: inherit !important;
+}
+
+.MuiTypography-root {
+  color: var(--text-base) !important;
+}
+
+.main-content {
+  background-color: var(--background-base);
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.card {
+  background-color: var(--background-elevated-base);
+  border-radius: 8px;
+  padding: 16px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.card:hover {
+  background-color: var(--background-tinted-base);
+}
+
+.button {
+  background-color: var(--essential-bright-accent);
+  color: var(--background-base);
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.button:hover {
+  transform: scale(1.04);
+}
+
+.input {
+  background-color: var(--background-tinted-base);
+  border: none;
+  border-radius: 4px;
+  color: var(--text-base);
+  padding: 8px 12px;
+  width: 100%;
+}
+
+.input:focus {
+  outline: none;
+  background-color: var(--background-tinted-highlight);
+} 
