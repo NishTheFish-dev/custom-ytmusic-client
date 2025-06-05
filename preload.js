@@ -27,7 +27,7 @@ contextBridge.exposeInMainWorld(
       searchVideos: (query, maxResults) => ipcRenderer.invoke('youtube:searchVideos', { query, maxResults }),
       getVideoDetails: (videoId) => ipcRenderer.invoke('youtube:getVideoDetails', videoId),
       getUserPlaylists: () => ipcRenderer.invoke('youtube:getUserPlaylists'),
-      getPlaylistItems: (playlistId) => ipcRenderer.invoke('youtube:getPlaylistItems', playlistId),
+      getPlaylistItems: (playlistId, pageToken) => ipcRenderer.invoke('youtube:getPlaylistItems', playlistId, pageToken),
       isAuthenticated: () => ipcRenderer.invoke('youtube:isAuthenticated')
     },
     auth: {
@@ -59,6 +59,10 @@ contextBridge.exposeInMainWorld(
     removeAuthSuccess: (callback) => {
       ipcRenderer.removeListener('auth-success', callback);
     },
-    getEnv: () => ipcRenderer.invoke('get-env')
+    getEnv: () => ipcRenderer.invoke('get-env'),
+    preferences: {
+      get: () => ipcRenderer.invoke('preferences:get'),
+      set: (preferences) => ipcRenderer.invoke('preferences:set', preferences)
+    }
   }
 ); 

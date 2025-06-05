@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import AuthComponent from './components/Auth/AuthComponent';
 import Sidebar from './components/Layout/Sidebar';
+import TopNav from './components/Layout/TopNav';
 import Player from './components/Player/Player';
 import QueuePanel from './components/Queue/QueuePanel';
 import UserProfile from './components/User/UserProfile';
@@ -101,9 +102,19 @@ function App() {
     setQueue(queue.filter(t => t.id !== track.id));
   };
 
-  const handlePlaylistClick = (playlist) => {
-    setSelectedPlaylist(playlist);
+  const handleSidebarPlaylistClick = (playlist) => {
     setCurrentView('playlist');
+    setSelectedPlaylist(playlist);
+  };
+
+  const handleSearch = (query) => {
+    // TODO: Implement search functionality
+    console.log('Search query:', query);
+  };
+
+  const handleHomeClick = () => {
+    setCurrentView('home');
+    setSelectedPlaylist(null);
   };
 
   const renderContent = () => {
@@ -113,7 +124,7 @@ function App() {
       case 'search':
         return <Box sx={{ p: 3 }}>Search Content</Box>;
       case 'library':
-        return <Playlists onPlaylistClick={handlePlaylistClick} onPlayClick={handleTrackPlay} />;
+        return <Playlists onPlaylistClick={handleSidebarPlaylistClick} onPlayClick={handleTrackPlay} />;
       case 'playlist':
         return selectedPlaylist ? (
           <Box sx={{ p: 3 }}>
@@ -181,14 +192,10 @@ function App() {
         ) : (
           <>
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-              <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
-              
-              <div className="main-content">
-                <div className="topbar">
-                  {/* TODO: Add search bar and navigation controls */}
-                </div>
-                
-                <div className="content">
+              <Sidebar currentView={currentView} setCurrentView={setCurrentView} onPlaylistClick={handleSidebarPlaylistClick} />
+              <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <TopNav onHomeClick={handleHomeClick} onSearch={handleSearch} />
+                <div className="content" style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
                   {renderContent()}
                 </div>
               </div>

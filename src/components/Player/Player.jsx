@@ -67,7 +67,13 @@ const Player = ({
           <img
             src={currentTrack.thumbnail}
             alt={currentTrack.title}
-            style={{ width: 56, height: 56, marginRight: 14, borderRadius: 4 }}
+            style={{ 
+              width: 64, 
+              height: 64, 
+              marginRight: 16, 
+              borderRadius: 4,
+              objectFit: 'cover'
+            }}
           />
         )}
         <Box>

@@ -45,6 +45,19 @@ const playlistStore = new Store({
   encryptionKey: 'your-encryption-key'
 });
 
+// Create a store for user preferences
+const preferencesStore = new Store({
+  name: 'preferences',
+  encryptionKey: 'your-encryption-key',
+  defaults: {
+    windowBounds: {
+      width: 1600,
+      height: 1000
+    },
+    sidebarWidth: 240
+  }
+});
+
 let mainWindow = null;
 const OAUTH_PORT = 51732; // You can use any free port
 
@@ -79,6 +92,28 @@ function listenForAuthCode() {
     });
     server.listen(OAUTH_PORT);
   });
+}
+
+// Helper: Ensure valid token (refresh if expired)
+async function ensureValidToken() {
+  const tokens = store.get('tokens');
+  if (!tokens) return false;
+  oauth2Client.setCredentials(tokens);
+
+  // If token is expired or about to expire, refresh it
+  if (tokens.expiry_date && tokens.expiry_date < Date.now()) {
+    try {
+      const { credentials } = await oauth2Client.refreshAccessToken();
+      store.set('tokens', credentials);
+      oauth2Client.setCredentials(credentials);
+      return true;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      store.delete('tokens');
+      return false;
+    }
+  }
+  return true;
 }
 
 // IPC handler to start OAuth flow
@@ -155,13 +190,15 @@ ipcMain.handle('youtube:getTokens', async (event, code) => {
 
 ipcMain.handle('youtube:searchVideos', async (event, { query, maxResults }) => {
   try {
+    await ensureValidToken();
     const response = await youtube.search.list({
       auth: oauth2Client,
       part: 'snippet',
       q: query,
       maxResults,
       type: 'video',
-      videoCategoryId: '10'
+      videoCategoryId: '10',
+      fields: 'items(id/videoId,snippet(title,description,thumbnails(maxres,high,default),channelTitle))'
     });
     return response.data;
   } catch (error) {
@@ -172,6 +209,7 @@ ipcMain.handle('youtube:searchVideos', async (event, { query, maxResults }) => {
 
 ipcMain.handle('youtube:getVideoDetails', async (event, videoId) => {
   try {
+    await ensureValidToken();
     const response = await youtube.videos.list({
       auth: oauth2Client,
       part: 'snippet,contentDetails,statistics',
@@ -186,6 +224,7 @@ ipcMain.handle('youtube:getVideoDetails', async (event, videoId) => {
 
 ipcMain.handle('youtube:getUserPlaylists', async () => {
   try {
+    await ensureValidToken();
     const response = await youtube.playlists.list({
       auth: oauth2Client,
       part: 'snippet,contentDetails',
@@ -199,25 +238,37 @@ ipcMain.handle('youtube:getUserPlaylists', async () => {
   }
 });
 
-ipcMain.handle('youtube:getPlaylistItems', async (event, playlistId) => {
+ipcMain.handle('youtube:getPlaylistItems', async (event, playlistId, pageToken = null) => {
   try {
+    await ensureValidToken();
     const response = await youtube.playlistItems.list({
       auth: oauth2Client,
       part: 'snippet,contentDetails',
       playlistId,
-      maxResults: 50
+      maxResults: 50,
+      pageToken: pageToken || undefined
     });
-    return response.data;
+    return {
+      items: Array.isArray(response.data.items) ? response.data.items : [],
+      nextPageToken: response.data.nextPageToken || null,
+      totalResults: response.data.pageInfo?.totalResults || 0,
+      error: null
+    };
   } catch (error) {
     console.error('Error getting playlist items:', error);
-    throw error;
+    return {
+      items: [],
+      nextPageToken: null,
+      totalResults: 0,
+      error: error.message || 'Unknown error occurred while fetching playlist items.'
+    };
   }
 });
 
 ipcMain.handle('youtube:isAuthenticated', async () => {
   try {
-    const tokens = store.get('tokens');
-    return !!tokens;
+    const result = await ensureValidToken();
+    return result;
   } catch (error) {
     console.error('Error checking authentication status:', error);
     return false;
@@ -507,9 +558,13 @@ function createWindow() {
     ? path.join(__dirname, 'preload.js')
     : path.join(process.resourcesPath, 'preload.js');
 
+  // Get saved window bounds or use defaults
+  const savedPreferences = preferencesStore.get('preferences') || preferencesStore.store;
+  const { windowBounds, sidebarWidth } = savedPreferences;
+
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: windowBounds.width,
+    height: windowBounds.height,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -519,6 +574,12 @@ function createWindow() {
       enableRemoteModule: false
     },
     show: false
+  });
+
+  // Save window bounds when window is resized
+  mainWindow.on('resize', () => {
+    const bounds = mainWindow.getBounds();
+    preferencesStore.set('preferences.windowBounds', bounds);
   });
 
   // Log the preload script path for debugging
@@ -565,4 +626,14 @@ app.on('window-all-closed', function () {
 // Handle any uncaught exceptions
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
+});
+
+// Add IPC handlers for preferences
+ipcMain.handle('preferences:get', () => {
+  return preferencesStore.get('preferences') || preferencesStore.store;
+});
+
+ipcMain.handle('preferences:set', (event, preferences) => {
+  preferencesStore.set('preferences', preferences);
+  return true;
 }); 

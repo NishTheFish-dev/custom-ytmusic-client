@@ -4,7 +4,14 @@ class YouTubeApi {
   }
 
   async isAuthenticated() {
-    return this._isAuthenticated;
+    try {
+      const result = await window.electronAPI.youtube.isAuthenticated();
+      this._isAuthenticated = result;
+      return result;
+    } catch (error) {
+      console.error('Error checking authentication status:', error);
+      return false;
+    }
   }
 
   async getAuthUrl() {

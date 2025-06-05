@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import AlbumGrid from '../Grid/AlbumGrid';
-import { playlistService } from '../../services/PlaylistService';
+import { playlistService } from '../../services/playlistService';
 
 const Playlists = ({ onPlaylistClick, onPlayClick }) => {
   const [playlists, setPlaylists] = useState([]);

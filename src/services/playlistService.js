@@ -137,7 +137,9 @@ class PlaylistService {
         id: playlist.id,
         title: playlist.snippet.title,
         description: playlist.snippet.description,
-        thumbnail: playlist.snippet.thumbnails?.default?.url,
+        thumbnail: playlist.snippet.thumbnails?.maxres?.url || 
+                  playlist.snippet.thumbnails?.high?.url || 
+                  playlist.snippet.thumbnails?.default?.url,
         itemCount: playlist.contentDetails.itemCount,
         channelTitle: playlist.snippet.channelTitle,
       }));
@@ -154,12 +156,67 @@ class PlaylistService {
         id: item.contentDetails.videoId,
         title: item.snippet.title,
         artist: item.snippet.videoOwnerChannelTitle,
-        thumbnail: item.snippet.thumbnails?.default?.url,
+        thumbnail: item.snippet.thumbnails?.maxres?.url || 
+                  item.snippet.thumbnails?.high?.url || 
+                  item.snippet.thumbnails?.default?.url,
         duration: item.contentDetails.duration,
       }));
     } catch (error) {
       console.error('Error fetching playlist items:', error);
       throw error;
+    }
+  }
+
+  async getPlaylistItemsIncremental(playlistId, onPageLoaded) {
+    let allItems = [];
+    let nextPageToken = null;
+    let first = true;
+    let error = null;
+    do {
+      const response = await window.electronAPI.youtube.getPlaylistItems(playlistId, nextPageToken);
+      if (response.error) {
+        error = response.error;
+        break;
+      }
+      const items = Array.isArray(response.items) ? response.items.map(item => ({
+        id: item.contentDetails?.videoId,
+        title: item.snippet?.title,
+        artist: item.snippet?.videoOwnerChannelTitle,
+        thumbnail: item.snippet?.thumbnails?.maxres?.url || 
+                  item.snippet?.thumbnails?.high?.url || 
+                  item.snippet?.thumbnails?.default?.url,
+        duration: item.contentDetails?.duration,
+      })) : [];
+      allItems = allItems.concat(items);
+      if (onPageLoaded) onPageLoaded([...allItems], items, response.nextPageToken, first, null);
+      first = false;
+      nextPageToken = response.nextPageToken;
+    } while (nextPageToken);
+    if (error && onPageLoaded) onPageLoaded([...allItems], [], null, first, error);
+    if (!error && allItems.length === 0 && onPageLoaded) onPageLoaded([], [], null, true, null);
+    return allItems;
+  }
+
+  // Fetch a single page of playlist items
+  async getPlaylistItemsPage(playlistId, pageToken = null) {
+    try {
+      const response = await window.electronAPI.youtube.getPlaylistItems(playlistId, pageToken);
+      const items = Array.isArray(response.items)
+        ? response.items.map(item => ({
+            id: item.contentDetails?.videoId,
+            title: item.snippet?.title,
+            artist: item.snippet?.videoOwnerChannelTitle,
+            thumbnail:
+              item.snippet?.thumbnails?.maxres?.url ||
+              item.snippet?.thumbnails?.high?.url ||
+              item.snippet?.thumbnails?.default?.url,
+            duration: item.contentDetails?.duration,
+          }))
+        : [];
+      return { items, nextPageToken: response.nextPageToken };
+    } catch (error) {
+      console.error('Error fetching playlist items page:', error);
+      return { items: [], nextPageToken: null };
     }
   }
 }
