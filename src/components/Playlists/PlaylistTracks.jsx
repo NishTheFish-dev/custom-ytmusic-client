@@ -4,6 +4,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { playlistService } from '../../services/playlistService';
 import { FixedSizeList as List } from 'react-window';
+import AutoSizer from "react-virtualized-auto-sizer";
 
 const BATCH_SIZE = 50;
 const DEBOUNCE_MS = 150;
@@ -12,6 +13,8 @@ const ITEM_HEIGHT = 64;
 const WINDOW_SIZE = 30;
 const WINDOW_BUFFER = 10;
 const TRACK_ROW_HEIGHT = 68;
+const PLAYER_BAR_HEIGHT = 90;
+const STICKY_HEADER_HEIGHT = 152; // px (120px image + 2*16px py + margins)
 
 const PlaylistTracks = ({ playlist, onPlayClick }) => {
   const [tracks, setTracks] = useState([]);
@@ -152,7 +155,22 @@ const PlaylistTracks = ({ playlist, onPlayClick }) => {
   // Row renderer for react-window
   const Row = ({ index, style }) => {
     const track = tracks[index];
-    if (!track) return <div style={style}>{SkeletonRow()}</div>;
+    if (!track) return null;
+
+    const handlePlayClick = () => {
+      if (!track.id) {
+        console.error('Track missing video ID:', track);
+        return;
+      }
+      onPlayClick({
+        id: track.id,
+        title: track.title,
+        artist: track.artist,
+        thumbnail: track.thumbnail,
+        duration: track.duration
+      });
+    };
+
     return (
       <Box
         style={style}
@@ -227,7 +245,7 @@ const PlaylistTracks = ({ playlist, onPlayClick }) => {
         </Typography>
         <IconButton
           size="small"
-          onClick={() => onPlayClick(track)}
+          onClick={handlePlayClick}
           sx={{ ml: 2 }}
         >
           <PlayArrowIcon />
@@ -263,20 +281,26 @@ const PlaylistTracks = ({ playlist, onPlayClick }) => {
           </Box>
         </Box>
         {/* Track List (react-window) */}
-        <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-          <List
-            height={typeof window !== 'undefined' ? window.innerHeight - 180 : 400}
-            itemCount={tracks.length}
-            itemSize={TRACK_ROW_HEIGHT}
-            width={'100%'}
-            onItemsRendered={handleItemsRendered}
-            ref={listRef}
-          >
-            {Row}
-          </List>
-          {loading && !initialLoad && Array.from({ length: 5 }).map((_, i) => (
-            <Box key={i}>{SkeletonRow()}</Box>
-          ))}
+        <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  height={height}
+                  itemCount={tracks.length}
+                  itemSize={TRACK_ROW_HEIGHT}
+                  width={width}
+                  onItemsRendered={handleItemsRendered}
+                  ref={listRef}
+                >
+                  {Row}
+                </List>
+              )}
+            </AutoSizer>
+            {/* {loading && !initialLoad && Array.from({ length: 5 }).map((_, i) => (
+              <Box key={i}>{SkeletonRow()}</Box>
+            ))} */}
+          </Box>
         </Box>
       </Box>
     </>

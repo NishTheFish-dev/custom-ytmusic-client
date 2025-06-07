@@ -13,6 +13,43 @@ contextBridge.exposeInMainWorld(
       removeListener: (channel, callback) => {
         ipcRenderer.removeListener(channel, callback);
       }
+    },
+    // Audio API
+    play: (track) => ipcRenderer.invoke('audio:play', track),
+    pause: () => ipcRenderer.invoke('audio:pause'),
+    resume: () => ipcRenderer.invoke('audio:resume'),
+    stop: () => ipcRenderer.invoke('audio:stop'),
+    setVolume: (volume) => ipcRenderer.invoke('audio:setVolume', volume),
+    getCurrentTime: () => ipcRenderer.invoke('audio:getCurrentTime'),
+    
+    // Audio event listeners
+    onFileReady: (callback) => {
+      ipcRenderer.on('audio:fileReady', (_, data) => callback(data));
+      return () => ipcRenderer.removeListener('audio:fileReady', callback);
+    },
+    onPaused: (callback) => {
+      ipcRenderer.on('audio:paused', () => callback());
+      return () => ipcRenderer.removeListener('audio:paused', callback);
+    },
+    onResumed: (callback) => {
+      ipcRenderer.on('audio:resumed', () => callback());
+      return () => ipcRenderer.removeListener('audio:resumed', callback);
+    },
+    onVolumeChanged: (callback) => {
+      ipcRenderer.on('audio:volumeChanged', (_, data) => callback(data));
+      return () => ipcRenderer.removeListener('audio:volumeChanged', callback);
+    },
+    onProgress: (callback) => {
+      ipcRenderer.on('audio:progress', (_, progress) => callback(progress));
+      return () => ipcRenderer.removeListener('audio:progress', callback);
+    },
+    onError: (callback) => {
+      ipcRenderer.on('audio:error', (_, error) => callback(error));
+      return () => ipcRenderer.removeListener('audio:error', callback);
+    },
+    onStopped: (callback) => {
+      ipcRenderer.on('audio:stopped', () => callback());
+      return () => ipcRenderer.removeListener('audio:stopped', callback);
     }
   }
 );
@@ -28,7 +65,8 @@ contextBridge.exposeInMainWorld(
       getVideoDetails: (videoId) => ipcRenderer.invoke('youtube:getVideoDetails', videoId),
       getUserPlaylists: () => ipcRenderer.invoke('youtube:getUserPlaylists'),
       getPlaylistItems: (playlistId, pageToken) => ipcRenderer.invoke('youtube:getPlaylistItems', playlistId, pageToken),
-      isAuthenticated: () => ipcRenderer.invoke('youtube:isAuthenticated')
+      isAuthenticated: () => ipcRenderer.invoke('youtube:isAuthenticated'),
+      getCookies: () => ipcRenderer.invoke('youtube:getCookies')
     },
     auth: {
       getStoredUser: () => ipcRenderer.invoke('auth:getStoredUser'),

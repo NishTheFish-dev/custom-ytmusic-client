@@ -71,6 +71,7 @@ code {
   height: 100vh;
   background-color: var(--background-base);
   color: var(--text-base);
+  padding-bottom: 120px;
 }
 
 .sidebar {
@@ -201,6 +202,13 @@ code {
   font-size: 0.875rem;
 }
 
+.track-thumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
 /* Buttons and Controls */
 .button {
   background-color: var(--essential-bright-accent);
@@ -260,38 +268,6 @@ code {
   background-color: var(--background-tinted-highlight);
 }
 
-/* Player Controls */
-.player-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.progress-bar {
-  flex: 1;
-  height: 4px;
-  background-color: var(--background-tinted-base);
-  border-radius: 2px;
-  cursor: pointer;
-  position: relative;
-}
-
-.progress-bar-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  background-color: var(--essential-bright-accent);
-  border-radius: 2px;
-}
-
-.volume-control {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 125px;
-}
-
 /* Search Bar */
 .search-bar {
   background-color: var(--background-tinted-base);
@@ -317,7 +293,7 @@ code {
 /* Grid Layout */
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 24px;
   padding: 24px;
 }

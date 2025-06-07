@@ -1,11 +1,12 @@
 require('dotenv').config();
-const { app, BrowserWindow, ipcMain, protocol, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, protocol, shell, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { google } = require('googleapis');
 const Store = require('electron-store');
 const http = require('http');
 const isDev = process.env.NODE_ENV === 'development';
+const { spawn } = require('child_process');
 
 // Add electron path resolution
 const pathFile = path.join(__dirname, 'path.txt');
@@ -146,7 +147,7 @@ ipcMain.handle('youtube:getAuthUrl', async () => {
     store.set('tokens', tokens);
     oauth2Client.setCredentials(tokens);
     
-    // Get user info
+    // Get user info and cookies
     const youtube = google.youtube('v3');
     const response = await youtube.channels.list({
       auth: oauth2Client,
@@ -163,6 +164,12 @@ ipcMain.handle('youtube:getAuthUrl', async () => {
     };
 
     store.set('user', user);
+
+    // Get YouTube cookies for play-dl
+    const cookies = await window.electronAPI.youtube.getCookies();
+    if (cookies) {
+      process.env.YOUTUBE_COOKIE = cookies;
+    }
     
     // Send the auth success event to the renderer
     if (mainWindow) {
@@ -553,7 +560,29 @@ ipcMain.handle('playlist:reorder', async (event, { playlistId, trackIds }) => {
   }
 });
 
-function createWindow() {
+// Add cookie handling
+ipcMain.handle('youtube:getCookies', async () => {
+  try {
+    const cookies = await session.defaultSession.cookies.get({
+      domain: '.youtube.com'
+    });
+    
+    // Format cookies for play-dl
+    const cookieString = cookies
+      .map(cookie => `${cookie.name}=${cookie.value}`)
+      .join('; ');
+    
+    // Update environment variable
+    process.env.YOUTUBE_COOKIE = cookieString;
+    
+    return cookieString;
+  } catch (error) {
+    console.error('Error getting cookies:', error);
+    return null;
+  }
+});
+
+async function createWindow() {
   const preloadPath = isDev 
     ? path.join(__dirname, 'preload.js')
     : path.join(process.resourcesPath, 'preload.js');
@@ -602,7 +631,7 @@ function createWindow() {
 }
 
 // Register custom protocol
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   protocol.registerHttpProtocol('ytmusic', (request) => {
     const url = new URL(request.url);
     const code = url.searchParams.get('code');
@@ -612,7 +641,7 @@ app.whenReady().then(() => {
     }
   });
 
-  createWindow();
+  await createWindow();
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

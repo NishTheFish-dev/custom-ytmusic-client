@@ -6,13 +6,12 @@ import Typography from '@mui/material/Typography';
 import AuthComponent from './components/Auth/AuthComponent';
 import Sidebar from './components/Layout/Sidebar';
 import TopNav from './components/Layout/TopNav';
-import Player from './components/Player/Player';
 import QueuePanel from './components/Queue/QueuePanel';
-import UserProfile from './components/User/UserProfile';
 import Playlists from './components/Playlists/Playlists';
 import PlaylistTracks from './components/Playlists/PlaylistTracks';
 import { youtubeApi } from './services/youtubeApi';
 import './index.css';
+import AutoSizer from 'react-virtualized-auto-sizer';
 
 const darkTheme = createTheme({
   palette: {
@@ -36,7 +35,6 @@ function App() {
   const [volume, setVolume] = useState(100);
   const [showQueue, setShowQueue] = useState(false);
   const [queue, setQueue] = useState([]);
-  const [user, setUser] = useState(null);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,12 +43,6 @@ function App() {
       try {
         const authStatus = await youtubeApi.isAuthenticated();
         setIsAuthenticated(authStatus);
-        if (authStatus) {
-          setUser({
-            name: 'User',
-            avatar: 'https://via.placeholder.com/40',
-          });
-        }
       } catch (error) {
         console.error('Error checking authentication:', error);
       } finally {
@@ -63,43 +55,6 @@ function App() {
 
   const handleAuthSuccess = () => {
     setIsAuthenticated(true);
-  };
-
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  const handlePrevious = () => {
-    // TODO: Implement previous track logic
-  };
-
-  const handleNext = () => {
-    // TODO: Implement next track logic
-  };
-
-  const handleSeek = (value) => {
-    setProgress(value);
-  };
-
-  const handleVolumeChange = (value) => {
-    setVolume(value);
-  };
-
-  const handleToggleQueue = () => {
-    setShowQueue(!showQueue);
-  };
-
-  const handleToggleMiniPlayer = () => {
-    // TODO: Implement mini player logic
-  };
-
-  const handleTrackPlay = (track) => {
-    setCurrentTrack(track);
-    setIsPlaying(true);
-  };
-
-  const handleTrackRemove = (track) => {
-    setQueue(queue.filter(t => t.id !== track.id));
   };
 
   const handleSidebarPlaylistClick = (playlist) => {
@@ -124,38 +79,12 @@ function App() {
       case 'search':
         return <Box sx={{ p: 3 }}>Search Content</Box>;
       case 'library':
-        return <Playlists onPlaylistClick={handleSidebarPlaylistClick} onPlayClick={handleTrackPlay} />;
+        return <Playlists onPlaylistClick={handleSidebarPlaylistClick} />;
       case 'playlist':
         return selectedPlaylist ? (
-          <Box sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <img
-                src={selectedPlaylist.thumbnail}
-                alt={selectedPlaylist.title}
-                style={{
-                  width: 232,
-                  height: 232,
-                  objectFit: 'cover',
-                  marginRight: 24,
-                }}
-              />
-              <Box>
-                <Typography variant="h4" sx={{ color: 'var(--text-base)', mb: 1 }}>
-                  {selectedPlaylist.title}
-                </Typography>
-                <Typography sx={{ color: 'var(--text-subdued)', mb: 2 }}>
-                  {selectedPlaylist.description}
-                </Typography>
-                <Typography sx={{ color: 'var(--text-subdued)' }}>
-                  {selectedPlaylist.itemCount} songs
-                </Typography>
-              </Box>
-            </Box>
-            <PlaylistTracks
-              playlist={selectedPlaylist}
-              onPlayClick={handleTrackPlay}
-            />
-          </Box>
+          <PlaylistTracks
+            playlist={selectedPlaylist}
+          />
         ) : null;
       default:
         return <Box sx={{ p: 3 }}>Home Content</Box>;
@@ -195,7 +124,11 @@ function App() {
               <Sidebar currentView={currentView} setCurrentView={setCurrentView} onPlaylistClick={handleSidebarPlaylistClick} />
               <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <TopNav onHomeClick={handleHomeClick} onSearch={handleSearch} />
-                <div className="content" style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
+                <div className="content" style={{ 
+                  flex: 1, 
+                  overflow: currentView === 'playlist' ? 'hidden' : 'auto', 
+                  padding: '24px'
+                }}>
                   {renderContent()}
                 </div>
               </div>
@@ -205,27 +138,8 @@ function App() {
               <QueuePanel
                 queue={queue}
                 currentTrack={currentTrack}
-                onTrackClick={handleTrackPlay}
-                onTrackPlay={handleTrackPlay}
-                onTrackRemove={handleTrackRemove}
               />
             )}
-
-            <Player
-              currentTrack={currentTrack}
-              isPlaying={isPlaying}
-              progress={progress}
-              volume={volume}
-              onPlayPause={handlePlayPause}
-              onPrevious={handlePrevious}
-              onNext={handleNext}
-              onSeek={handleSeek}
-              onVolumeChange={handleVolumeChange}
-              onToggleQueue={handleToggleQueue}
-              onToggleMiniPlayer={handleToggleMiniPlayer}
-            />
-
-            <UserProfile user={user} onLogout={() => setIsAuthenticated(false)} />
           </>
         )}
       </div>

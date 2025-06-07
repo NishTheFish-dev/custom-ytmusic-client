@@ -100,7 +100,7 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
       />
       
       <Box sx={{ flex: 1, overflowY: 'auto', px: 1 }}>
-        <Typography variant="h6" sx={{ color: 'var(--text-base)', px: 1, mb: 1, fontWeight: 700 }}>
+        <Typography variant="h6" sx={{ color: 'var(--text-base)', px: 1, mb: 1, fontWeight: 700, mt: 4, ml: 1 }}>
           Your Playlists
         </Typography>
         {loading ? (
