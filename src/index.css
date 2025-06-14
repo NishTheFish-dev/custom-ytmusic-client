@@ -16,8 +16,8 @@
   --essential-announcement: #0d72ea;
   --decorative-base: #fff;
   --decorative-subdued: #292929;
-  --sidebar-width: 240px;
-  --queue-width: 300px;
+  --sidebar-width: 400px;
+  --queue-width: 400px;
   --topbar-height: 64px;
   --player-height: 90px;
   --scrollbar-size: 8px;
@@ -70,6 +70,8 @@ code {
 .queue-open .content {
   margin-right: var(--queue-width);
 }
+
+
 .app-container {
   display: flex;
   flex-direction: column;
@@ -127,6 +129,7 @@ code {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  margin-top: var(--topbar-height);
 }
 
 .content {
@@ -350,31 +353,21 @@ code {
 /* Hover Scrollbar Rules - refined */
 .sidebar,
 .sidebar * {
-  scrollbar-width: none;
+  scrollbar-width: thin; /* always show */
 }
 
-.sidebar:hover,
-.sidebar:hover * {
-  scrollbar-width: thin;
-}
-
-/* Hide WebKit scrollbar until hover */
 .sidebar *::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-.sidebar:hover *::-webkit-scrollbar {
   width: var(--scrollbar-size);
   height: var(--scrollbar-size);
 }
 
 .sidebar *::-webkit-scrollbar-thumb {
   background-color: transparent;
-  transition: background-color 0.2s ease 1s;
+  transition: background-color 0.2s ease;
 }
 .sidebar:hover *::-webkit-scrollbar-thumb {
   background-color: var(--background-tinted-base);
-  transition-delay: 0s;
+  
 }
 
 
@@ -384,35 +377,29 @@ code {
 
 .queue-panel,
 .queue-panel * {
-  scrollbar-width: none;
+  scrollbar-width: thin; /* always show */
 }
 
-.queue-panel:hover,
-.queue-panel:hover * {
-  scrollbar-width: thin;
-}
-
-/* Hide WebKit scrollbar until hover */
 .queue-panel *::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-.queue-panel:hover *::-webkit-scrollbar {
   width: var(--scrollbar-size);
   height: var(--scrollbar-size);
 }
 
 .queue-panel *::-webkit-scrollbar-thumb {
   background-color: transparent;
-  transition: background-color 0.2s ease 1s;
+  transition: background-color 0.2s ease;
 }
 .queue-panel:hover *::-webkit-scrollbar-thumb {
   background-color: var(--background-tinted-base);
-  transition-delay: 0s;
+  
 }
 
 
 /* Responsive Design */
+.queue-open .topbar {
+  right: var(--queue-width);
+}
+
 @media (max-width: 768px) {
   :root {
     --sidebar-width: 0px;

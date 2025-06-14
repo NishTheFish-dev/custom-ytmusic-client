@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, IconButton, Slider, Typography, useTheme } from '@mui/material';
-import { PlayArrow, Pause, SkipPrevious, SkipNext, VolumeUp, QueueMusic, Shuffle, Repeat, RepeatOne } from '@mui/icons-material';
+import { PlayArrow, Pause, SkipPrevious, SkipNext, VolumeUp, VolumeOff, QueueMusic, Shuffle, Repeat, RepeatOne } from '@mui/icons-material';
 
 import { useAudio } from '../../context/AudioContext';
 
@@ -22,6 +22,7 @@ const PlayerBar = ({ onToggleQueue }) => {
     toggleShuffle,
     cycleRepeat,
   } = useAudio();
+  const [prevVolume, setPrevVolume] = React.useState(volume);
   const theme = useTheme();
 
   if (!currentTrack) return null;
@@ -98,8 +99,10 @@ const PlayerBar = ({ onToggleQueue }) => {
           style={{ width: '56px', height: '56px', objectFit: 'cover', marginRight: '16px' }}
         />
         <Box>
-          <Typography variant="subtitle2" noWrap>{currentTrack.title}</Typography>
-          <Typography variant="caption" color="text.secondary" noWrap>
+          <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600, fontSize: '1rem' }}>
+            {currentTrack.title}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" noWrap sx={{ fontSize: '0.9rem' }}>
             {currentTrack.artist}
           </Typography>
         </Box>
@@ -179,7 +182,16 @@ const PlayerBar = ({ onToggleQueue }) => {
         gap: '16px',
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', width: '120px' }}>
-          <VolumeUp sx={{ color: 'text.secondary', mr: 1 }} />
+          <IconButton onClick={() => {
+            if (volume === 0) {
+              changeVolume(prevVolume || 50);
+            } else {
+              setPrevVolume(volume);
+              changeVolume(0);
+            }
+          }} size="small" sx={{ mr: 1 }}>
+            {volume === 0 ? <VolumeOff /> : <VolumeUp />}
+          </IconButton>
           <Slider
             value={volume}
             onChange={(_, value) => changeVolume(value)}

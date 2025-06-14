@@ -27,7 +27,7 @@ const QueuePanel = ({
         top: 0,
         right: 0,
         bottom: 'calc(var(--player-height) + 6px)',
-        width: 300,
+        width: 'var(--queue-width)',
         backgroundColor: 'var(--background-base)',
         borderLeft: '1px solid var(--background-highlight)',
         display: 'flex',

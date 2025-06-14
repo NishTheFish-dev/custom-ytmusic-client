@@ -7,7 +7,13 @@ const TopNav = ({ onHomeClick, onSearch }) => {
   const [searchText, setSearchText] = useState('');
   return (
     <Box
+      className="topbar"
       sx={{
+        position: 'fixed',
+        top: 0,
+        left: 'var(--sidebar-width)',
+        right: 0,
+
         height: 64,
         display: 'flex',
         alignItems: 'center',
@@ -46,12 +52,7 @@ const TopNav = ({ onHomeClick, onSearch }) => {
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <SearchIcon sx={{ color: 'var(--text-subdued)' }} />
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={() => onSearch(searchText)}>
+              <IconButton onClick={() => { if (searchText.trim()) onSearch(searchText); }}>
                 <SearchIcon sx={{ color: 'var(--text-subdued)' }} />
               </IconButton>
             </InputAdornment>

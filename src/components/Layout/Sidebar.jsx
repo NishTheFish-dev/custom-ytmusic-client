@@ -4,14 +4,12 @@ import AddIcon from '@mui/icons-material/Add';
 import { playlistService } from '../../services/playlistService';
 import { preferencesService } from '../../services/preferencesService';
 
-const Sidebar = ({ currentView, setCurrentView, onPlaylistClick, sidebarWidth, onWidthChange }) => {
+const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  const [isResizing, setIsResizing] = useState(false);
-  const sidebarRef = useRef(null);
-  const maxWidth = 400; // 1/4 of default app width (1600)
+  
 
   useEffect(() => {
     loadPlaylists();
@@ -39,68 +37,26 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick, sidebarWidth, o
     }
   };
 
-  const handleMouseDown = (e) => {
-    setIsResizing(true);
-    e.preventDefault();
-  };
 
-  useEffect(() => {
-    const handleMouseMove = async (e) => {
-      if (!isResizing) return;
 
-      const newWidth = e.clientX;
-      if (newWidth >= 200 && newWidth <= maxWidth) {
-        onWidthChange?.(newWidth);
-        await preferencesService.updateSidebarWidth(newWidth);
-      }
-    };
 
-    const handleMouseUp = () => {
-      setIsResizing(false);
-    };
-
-    if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizing, maxWidth]);
 
   return (
     <Box
       className="sidebar"
-      ref={sidebarRef}
       sx={{
-        width: sidebarWidth,
+        width: 'var(--sidebar-width)',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: 'var(--background-base)',
-        borderRight: '1px solid var(--background-tinted-base)',
+        /* Fixed width sidebar, no resizer */
         position: 'relative',
       }}
     >
-      <Box
-        sx={{
-          position: 'absolute',
-          right: '-1px',
-          top: 0,
-          bottom: 0,
-          width: '2px',
-          cursor: 'col-resize',
-          '&:hover': {
-            backgroundColor: 'var(--essential-bright-accent)',
-          },
-          backgroundColor: isResizing ? 'var(--essential-bright-accent)' : 'transparent',
-        }}
-        onMouseDown={handleMouseDown}
-      />
+
       
-      <Box sx={{ flex: 1, overflowY: 'auto', px: 1 }}>
+      <Box sx={{ flex: 1, overflowY: 'auto', px: 1, pb: 'var(--player-height)' }}>
         {/* Sticky header */}
         <Box sx={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--background-base)', pt: 4, pb: 1 }}>
           <Typography variant="h6" sx={{ color: 'var(--text-base)', px: 1, mb: 1, fontWeight: 700, ml: 1 }}>
@@ -142,27 +98,6 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick, sidebarWidth, o
             ))}
           </List>
         )}
-      </Box>
-
-      <Box sx={{ p: 2 }}>
-        <ListItem
-          button
-          sx={{
-            borderRadius: 1,
-            backgroundColor: 'var(--background-highlight)',
-            '&:hover': {
-              backgroundColor: 'var(--background-highlight)',
-            },
-          }}
-        >
-          <ListItemIcon sx={{ color: 'var(--text-base)' }}>
-            <AddIcon />
-          </ListItemIcon>
-          <ListItemText
-            primary="Create Playlist"
-            primaryTypographyProps={{ sx: { fontSize: '0.9rem' } }}
-          />
-        </ListItem>
       </Box>
     </Box>
   );
