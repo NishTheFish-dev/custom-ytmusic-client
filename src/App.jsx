@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, createTheme } from '@mui/material';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -9,15 +9,20 @@ import TopNav from './components/Layout/TopNav';
 import QueuePanel from './components/Queue/QueuePanel';
 import Playlists from './components/Playlists/Playlists';
 import PlaylistTracks from './components/Playlists/PlaylistTracks';
+import PlayerBar from './components/Player/PlayerBar';
+import { useAudio } from './context/AudioContext';
 import { youtubeApi } from './services/youtubeApi';
 import './index.css';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 const darkTheme = createTheme({
+  typography: {
+    fontFamily: ['Inter', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'].join(','),
+  },
   palette: {
     mode: 'dark',
     primary: {
-      main: '#1DB954',
+      main: '#ff0000'
     },
     background: {
       default: '#121212',
@@ -27,14 +32,13 @@ const darkTheme = createTheme({
 });
 
 function App() {
+  const { currentTrack, queue } = useAudio();
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState('home');
-  const [currentTrack, setCurrentTrack] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(100);
+  // currentTrack handled by AudioContext
   const [showQueue, setShowQueue] = useState(false);
-  const [queue, setQueue] = useState([]);
+  // queue handled by AudioContext
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -112,6 +116,8 @@ function App() {
     );
   }
 
+  const handleToggleQueue = () => setShowQueue(prev => !prev);
+
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
@@ -133,6 +139,8 @@ function App() {
                 </div>
               </div>
             </div>
+
+            <PlayerBar onToggleQueue={handleToggleQueue} />
 
             {showQueue && (
               <QueuePanel

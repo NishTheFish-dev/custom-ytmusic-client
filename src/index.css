@@ -9,7 +9,7 @@
   --background-tinted-highlight: hsla(0,0%,100%,.1);
   --essential-base: #fff;
   --essential-subdued: #727272;
-  --essential-bright-accent: #1ed760;
+  --essential-bright-accent: #ff0000;
   --essential-negative: #e91429;
   --essential-warning: #ffa42b;
   --essential-positive: #1ed760;
@@ -29,7 +29,7 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -115,12 +115,21 @@ code {
   left: 0;
   right: 0;
   height: var(--player-height);
+  background: rgba(24, 24, 24, 0.9);
+  backdrop-filter: blur(12px);
   background-color: var(--background-elevated-base);
   border-top: 1px solid var(--background-tinted-base);
   padding: 0 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* Navigation / selection highlights */
+.MuiListItem-root.Mui-selected {
+  color: var(--text-base) !important;
+  background-color: var(--background-tinted-base) !important;
+  border-left: 4px solid var(--essential-bright-accent);
 }
 
 /* Material-UI Overrides */

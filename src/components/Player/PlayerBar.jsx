@@ -1,0 +1,196 @@
+import React from 'react';
+import { Box, IconButton, Slider, Typography, useTheme } from '@mui/material';
+import { PlayArrow, Pause, SkipPrevious, SkipNext, VolumeUp, QueueMusic } from '@mui/icons-material';
+
+import { useAudio } from '../../context/AudioContext';
+
+const PlayerBar = ({
+  onToggleQueue,
+  sidebarWidth = 240, // Default width if not provided
+}) => {
+  const {
+    currentTrack,
+    isPlaying,
+    progress,
+    duration,
+    volume,
+    togglePlay,
+    seek,
+    changeVolume,
+    playTrack,
+    queue,
+    setQueue,
+  } = useAudio();
+  const theme = useTheme();
+
+  if (!currentTrack) return null;
+
+  const parseDurationToSeconds = (dur) => {
+    if (typeof dur === 'number') return dur;
+    if (typeof dur !== 'string') return 0;
+    const parts = dur.split(':').map(Number);
+    if (parts.length === 2) {
+      return parts[0] * 60 + parts[1];
+    }
+    if (parts.length === 3) {
+      return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    }
+    return 0;
+  };
+
+  const durationSeconds = duration || parseDurationToSeconds(currentTrack.duration);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  };
+
+  // theme already called above
+
+  const handleNext = () => {
+    if (queue.length) {
+      const [next, ...rest] = queue;
+      setQueue(rest);
+      playTrack(next);
+    }
+  };
+
+  const handlePrevious = () => {
+    // For simplicity, restart current track
+    seek(0);
+  };
+
+  
+  return (
+    <Box
+      sx={{
+        position: 'fixed',
+        bottom: 0,
+        left: `${sidebarWidth}px`,
+        right: 0,
+        height: '80px',
+        paddingTop: '8px',
+        backgroundColor: 'var(--background-base)',
+        borderTop: '1px solid var(--background-tinted-base)',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 16px',
+        zIndex: 1000,
+        '@media (max-width: 600px)': {
+          padding: '0 8px',
+          '& .MuiTypography-caption': {
+            fontSize: '0.7rem',
+          },
+          '& .MuiIconButton-root': {
+            padding: '6px',
+          },
+        },
+      }}
+    >
+      {/* Track Info */}
+      <Box sx={{ display: 'flex', alignItems: 'center', width: '30%' }}>
+        <img
+          src={currentTrack.thumbnail}
+          alt={currentTrack.title}
+          style={{ width: '56px', height: '56px', objectFit: 'cover', marginRight: '16px' }}
+        />
+        <Box>
+          <Typography variant="subtitle2" noWrap>{currentTrack.title}</Typography>
+          <Typography variant="caption" color="text.secondary" noWrap>
+            {currentTrack.artist}
+          </Typography>
+        </Box>
+      </Box>
+
+
+      {/* Player Controls */}
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        flex: 1,
+        maxWidth: '40%',
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <IconButton size="small" onClick={handlePrevious}>
+            <SkipPrevious />
+          </IconButton>
+          <IconButton
+            size="large"
+            onClick={togglePlay}
+            sx={{
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
+              '&:hover': {
+                backgroundColor: theme.palette.primary.dark,
+              },
+            }}
+          >
+            {isPlaying ? <Pause /> : <PlayArrow />}
+          </IconButton>
+          <IconButton size="small" onClick={handleNext}>
+            <SkipNext />
+          </IconButton>
+        </Box>
+        <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Typography variant="caption" color="text.secondary" sx={{ minWidth: '40px' }}>
+            {formatTime(progress * durationSeconds / 100)}
+          </Typography>
+          <Slider
+            value={progress}
+            onChange={(_, value) => seek(value)}
+            size="small"
+            sx={{
+              color: theme.palette.primary.main,
+              '& .MuiSlider-thumb': {
+                width: 12,
+                height: 12,
+                '&:hover, &.Mui-focusVisible': {
+                  boxShadow: `0px 0px 0px 8px ${theme.palette.primary.main}29`,
+                },
+              },
+              '& .MuiSlider-rail': {
+                opacity: 0.3,
+                backgroundColor: '#4f4f4f',
+              },
+            }}
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ minWidth: '40px' }}>
+            {formatTime(durationSeconds)}
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Volume and Queue Controls */}
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        width: '30%',
+        gap: '16px',
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', width: '120px' }}>
+          <VolumeUp sx={{ color: 'text.secondary', mr: 1 }} />
+          <Slider
+            value={volume}
+            onChange={(_, value) => changeVolume(value)}
+            size="small"
+            sx={{
+              color: 'primary.main',
+              '& .MuiSlider-thumb': {
+                width: 10,
+                height: 10,
+              },
+            }}
+          />
+        </Box>
+        <IconButton onClick={onToggleQueue}>
+          <QueueMusic />
+        </IconButton>
+      </Box>
+    </Box>
+  );
+};
+
+export default PlayerBar;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useAudio } from '../../context/AudioContext';
 import { Box, Typography, IconButton, CircularProgress, Skeleton } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -16,7 +17,8 @@ const TRACK_ROW_HEIGHT = 68;
 const PLAYER_BAR_HEIGHT = 90;
 const STICKY_HEADER_HEIGHT = 152; // px (120px image + 2*16px py + margins)
 
-const PlaylistTracks = ({ playlist, onPlayClick }) => {
+const PlaylistTracks = ({ playlist }) => {
+  const { playTrack, queue, setQueue } = useAudio();
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -162,13 +164,16 @@ const PlaylistTracks = ({ playlist, onPlayClick }) => {
         console.error('Track missing video ID:', track);
         return;
       }
-      onPlayClick({
+      playTrack({
         id: track.id,
         title: track.title,
         artist: track.artist,
         thumbnail: track.thumbnail,
-        duration: track.duration
+        duration: track.duration,
       });
+      // Add remaining tracks as queue starting from next index
+      const rest = tracks.slice(index + 1);
+      setQueue(rest);
     };
 
     return (
