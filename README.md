@@ -24,7 +24,7 @@ An unofficial custom desktop client for YouTube Music built with React.js and El
 
 | Version | Date       | Highlights |
 |---------|------------|------------|
-| v0.2.3  | 2025-06-14 | • New authentication screen with "Sign in with YouTube" button  <br>• Personalized home screen welcomes you by Google username  <br>• Auto-loads stored user info on app start & robust username fetch  <br>• Toned-down hover effect on sign-in button for a subtler feel |
+| v0.2.3  | 2025-06-14 | • New authentication screen with "Sign in with YouTube" button  <br>• Personalized home screen welcomes you by Google username  <br>• Auto-loads stored user info on app start & robust username fetch  |
 | v0.2.2  | 2025-06-14 | • Added responsive title truncation based on queue state  <br>• Fixed playlist scroll area to extend fully to bottom player bar  <br>• Added consistent bottom padding across all scrollable areas  <br>• Improved layout behavior when queue is toggled  <br>• Slight bugfix for removing invisible buttons from songs in queue |
 | v0.2.1  | 2025-06-14 | • Added play & overflow controls to search results  <br>• Fixed duration/progress not updating when playing from search  <br>• Instant UI reset when switching tracks |
 | v0.2.0  | 2025-06-14 | Initial search feature: query typing, result list, playback, queue building |
