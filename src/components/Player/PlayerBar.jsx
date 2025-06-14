@@ -24,9 +24,6 @@ const PlayerBar = ({ onToggleQueue }) => {
   } = useAudio();
   const [prevVolume, setPrevVolume] = React.useState(volume);
   const theme = useTheme();
-
-  if (!currentTrack) return null;
-
   const parseDurationToSeconds = (dur) => {
     if (typeof dur === 'number') return dur;
     if (typeof dur !== 'string') return 0;
@@ -40,7 +37,8 @@ const PlayerBar = ({ onToggleQueue }) => {
     return 0;
   };
 
-  const durationSeconds = duration || parseDurationToSeconds(currentTrack.duration);
+  const hasTrack = Boolean(currentTrack);
+  const durationSeconds = hasTrack ? (duration || parseDurationToSeconds(currentTrack?.duration)) : 0;
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -93,19 +91,27 @@ const PlayerBar = ({ onToggleQueue }) => {
     >
       {/* Track Info */}
       <Box sx={{ display: 'flex', alignItems: 'center', width: '30%' }}>
-        <img
-          src={currentTrack.thumbnail}
-          alt={currentTrack.title}
-          style={{ width: '56px', height: '56px', objectFit: 'cover', marginRight: '16px' }}
-        />
-        <Box>
-          <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600, fontSize: '1rem' }}>
-            {currentTrack.title}
+        {hasTrack ? (
+          <>
+            <img
+              src={currentTrack.thumbnail}
+              alt={currentTrack.title}
+              style={{ width: '56px', height: '56px', objectFit: 'cover', marginRight: '16px' }}
+            />
+            <Box>
+              <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600, fontSize: '1rem' }}>
+                {currentTrack.title}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" noWrap sx={{ fontSize: '0.9rem' }}>
+                {currentTrack.artist}
+              </Typography>
+            </Box>
+          </>
+        ) : (
+          <Typography variant="subtitle1" sx={{ color: 'var(--text-subdued)', fontSize: '1rem' }}>
+            Nothing playing
           </Typography>
-          <Typography variant="body2" color="text.secondary" noWrap sx={{ fontSize: '0.9rem' }}>
-            {currentTrack.artist}
-          </Typography>
-        </Box>
+        )}
       </Box>
 
 
@@ -118,15 +124,15 @@ const PlayerBar = ({ onToggleQueue }) => {
         maxWidth: '40%',
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', mt: '4px' }}>
-          <IconButton size="small" onClick={toggleShuffle} sx={{ color: shuffle ? theme.palette.primary.main : 'inherit' }}>
+          <IconButton size="small" onClick={toggleShuffle} sx={{ color: shuffle ? theme.palette.primary.main : 'inherit' }} disabled={!hasTrack}>
             <Shuffle />
           </IconButton>
-          <IconButton size="small" onClick={handlePrevious}>
+          <IconButton size="small" onClick={handlePrevious} disabled={!hasTrack}>
             <SkipPrevious />
           </IconButton>
           <IconButton
             size="large"
-            onClick={togglePlay}
+            onClick={hasTrack ? togglePlay : undefined}
             sx={{
               backgroundColor: theme.palette.primary.main,
               color: theme.palette.primary.contrastText,
@@ -137,20 +143,20 @@ const PlayerBar = ({ onToggleQueue }) => {
           >
             {isPlaying ? <Pause /> : <PlayArrow />}
           </IconButton>
-          <IconButton size="small" onClick={handleNext}>
+          <IconButton size="small" onClick={handleNext} disabled={!hasTrack}>
             <SkipNext />
           </IconButton>
-          <IconButton size="small" onClick={cycleRepeat} sx={{ color: repeatMode ? theme.palette.primary.main : 'inherit' }}>
+          <IconButton size="small" onClick={cycleRepeat} sx={{ color: repeatMode ? theme.palette.primary.main : 'inherit' }} disabled={!hasTrack}>
             {repeatMode === 2 ? <RepeatOne /> : <Repeat />}
           </IconButton>
         </Box>
         <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Typography variant="caption" color="text.secondary" sx={{ minWidth: '40px' }}>
-            {formatTime(progress * durationSeconds / 100)}
+            {hasTrack ? formatTime(progress * durationSeconds / 100) : '--:--'}
           </Typography>
           <Slider
-            value={progress}
-            onChange={(_, value) => seek(value)}
+            value={hasTrack ? progress : 0}
+            onChange={(_, value) => hasTrack && seek(value)}
             size="small"
             sx={{
               color: theme.palette.primary.main,
@@ -168,7 +174,7 @@ const PlayerBar = ({ onToggleQueue }) => {
             }}
           />
           <Typography variant="caption" color="text.secondary" sx={{ minWidth: '40px' }}>
-            {formatTime(durationSeconds)}
+            {hasTrack ? formatTime(durationSeconds) : '--:--'}
           </Typography>
         </Box>
       </Box>
@@ -195,6 +201,7 @@ const PlayerBar = ({ onToggleQueue }) => {
           <Slider
             value={volume}
             onChange={(_, value) => changeVolume(value)}
+            disabled={!hasTrack}
             size="small"
             sx={{
               color: 'primary.main',

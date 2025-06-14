@@ -18,7 +18,10 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
   useEffect(() => {
     const loadPreferences = async () => {
       const preferences = await preferencesService.getPreferences();
-      onWidthChange?.(preferences.sidebarWidth);
+      // apply saved sidebar width if available
+      if (preferences.sidebarWidth) {
+        document.documentElement.style.setProperty('--sidebar-width', `${preferences.sidebarWidth}px`);
+      }
     };
     loadPreferences();
   }, []);

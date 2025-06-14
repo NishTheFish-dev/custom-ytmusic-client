@@ -14,6 +14,9 @@ export const AudioProvider = ({ children }) => {
   const [duration, setDuration] = useState(0);
   const [queue, setQueue] = useState([]);
   const [shuffle, setShuffle] = useState(false); // shuffle enable flag
+  const fullPlaylistRef = useRef([]); // stores entire playlist when user initiates playback
+  // store tracks that have already been played in the current session/playlist
+  const playedHistoryRef = useRef([]);
   const [repeatMode, setRepeatMode] = useState(0); // 0 = none, 1 = all, 2 = one
   const originalQueueRef = useRef([]); // keep snapshot for repeat all
   const progressInterval = useRef(null);
@@ -57,6 +60,14 @@ export const AudioProvider = ({ children }) => {
     if (!track) return;
     // Stop existing timers and reset UI immediately
     clearProgressTimer();
+    // keep track of what we have already played (excluding first load)
+    if (currentTrack) {
+      // avoid duplicates – only push if not last in history
+      const last = playedHistoryRef.current[playedHistoryRef.current.length - 1];
+      if (!last || last.id !== currentTrack.id) {
+        playedHistoryRef.current.push(currentTrack);
+      }
+    }
     setProgress(0);
     const initialDur = parseDurationToSeconds(track.duration);
     setDuration(initialDur);
@@ -148,6 +159,8 @@ export const AudioProvider = ({ children }) => {
     };
   }, []);
 
+  const setFullPlaylist = (arr = []) => { fullPlaylistRef.current = arr; };
+
   const value = {
     currentTrack,
     isPlaying,
@@ -161,13 +174,17 @@ export const AudioProvider = ({ children }) => {
     seek,
     changeVolume,
     setQueue,
+    setFullPlaylist,
     shuffle,
     repeatMode,
     toggleShuffle: () => setShuffle(prev => {
       if (!prev) {
         // turning ON: snapshot current order and shuffle queue
-        originalQueueRef.current = [...queue];
-        const shuffled = [...queue];
+        // Build a list containing every other song in the playlist except the current track
+        const baseList = fullPlaylistRef.current.length ? fullPlaylistRef.current : [...playedHistoryRef.current, ...queue, currentTrack].filter(Boolean);
+        const others = baseList.filter(t => t.id !== currentTrack?.id);
+        originalQueueRef.current = others;
+        const shuffled = [...others];
         for (let i = shuffled.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];

@@ -24,7 +24,7 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
     const maxLength = 30; // Adjust based on your layout
     return title.length > maxLength ? `${title.substring(0, maxLength)}...` : title;
   };
-  const { playTrack, queue, setQueue } = useAudio();
+  const { playTrack, queue, setQueue, setFullPlaylist, shuffle } = useAudio();
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -166,6 +166,8 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
     if (!track) return null;
 
     const handlePlayClick = () => {
+    // store entire playlist for global shuffle reference
+    setFullPlaylist(tracks);
       if (!track.id) {
         console.error('Track missing video ID:', track);
         return;
@@ -178,8 +180,17 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
         duration: track.duration,
       });
       // Add remaining tracks as queue starting from next index
-      const rest = tracks.slice(index + 1);
-      setQueue(rest);
+      // Build rest of playlist excluding selected track
+    let rest = tracks.filter(t => t.id !== track.id);
+    // If shuffle mode already ON, shuffle the rest now
+    if (shuffle) {
+      rest = [...rest];
+      for (let i = rest.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rest[i], rest[j]] = [rest[j], rest[i]];
+      }
+    }
+    setQueue(rest);
     };
 
     return (

@@ -111,8 +111,8 @@ const AuthComponent = ({ onAuthSuccess }) => {
             borderRadius: '500px',
             textTransform: 'none',
             '&:hover': {
-              backgroundColor: '#1ed760',
-              transform: 'scale(1.04)',
+              backgroundColor: '#c62828', // darker YouTube red
+              boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
             },
             '&:disabled': {
               backgroundColor: 'var(--background-tinted-base)',

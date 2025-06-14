@@ -4,6 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import AuthComponent from './components/Auth/AuthComponent';
+import { authService } from './services/authService';
 import Sidebar from './components/Layout/Sidebar';
 import TopNav from './components/Layout/TopNav';
 import QueuePanel from './components/Queue/QueuePanel';
@@ -46,6 +47,21 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [googleUser, setGoogleUser] = useState(null);
+
+  // Ensure username is loaded when app initializes and user already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !googleUser) {
+      const stored = authService.getUser();
+      if (stored) {
+        setGoogleUser(stored.name || stored.displayName || stored.given_name || stored.email || null);
+      } else {
+        authService.getUserInfo()
+          .then(info => setGoogleUser(info?.name || info?.displayName || info?.given_name || info?.email || null))
+          .catch(err => console.error('Failed fetching user info', err));
+      }
+    }
+  }, [isAuthenticated, googleUser]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -62,8 +78,14 @@ function App() {
     checkAuth();
   }, []);
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = async () => {
     setIsAuthenticated(true);
+    try {
+      const info = await authService.getUserInfo();
+      setGoogleUser(info?.name || info?.displayName || null);
+    } catch (e) {
+      console.error('Failed fetching user info', e);
+    }
   };
 
   const handleSidebarPlaylistClick = (playlist) => {
@@ -94,7 +116,13 @@ function App() {
   const renderContent = () => {
     switch (currentView) {
       case 'home':
-        return <Box sx={{ p: 3 }}>Home Content</Box>;
+        return (
+          <Box sx={{ p: 6 }}>
+            <Typography variant="h4" sx={{ fontWeight: 700 }}>
+              {`Welcome${googleUser ? ", " + googleUser : ""}`}
+            </Typography>
+          </Box>
+        );
       case 'search':
         return <SearchResults results={searchResults} query={searchQuery} isQueueOpen={showQueue} />;
       case 'library':
@@ -107,7 +135,13 @@ function App() {
           />
         ) : null;
       default:
-        return <Box sx={{ p: 3 }}>Home Content</Box>;
+        return (
+          <Box sx={{ p: 6 }}>
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              {`Welcome${googleUser ? ", " + googleUser : ""}`}
+            </Typography>
+          </Box>
+        );
     }
   };
 
