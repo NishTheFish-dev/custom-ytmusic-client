@@ -21,14 +21,18 @@ const QueuePanel = ({
   onTrackRemove,
 }) => {
   return (
-    <Box
+    <Box className="queue-panel"
       sx={{
+        position: 'fixed',
+        top: 0,
+        right: 0,
+        bottom: 'calc(var(--player-height) + 6px)',
         width: 300,
-        height: '100%',
         backgroundColor: 'var(--background-base)',
         borderLeft: '1px solid var(--background-highlight)',
         display: 'flex',
         flexDirection: 'column',
+        zIndex: 900,
       }}
     >
       <Box sx={{ p: 2 }}>

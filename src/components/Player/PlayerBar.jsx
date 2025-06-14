@@ -1,13 +1,10 @@
 import React from 'react';
 import { Box, IconButton, Slider, Typography, useTheme } from '@mui/material';
-import { PlayArrow, Pause, SkipPrevious, SkipNext, VolumeUp, QueueMusic } from '@mui/icons-material';
+import { PlayArrow, Pause, SkipPrevious, SkipNext, VolumeUp, QueueMusic, Shuffle, Repeat, RepeatOne } from '@mui/icons-material';
 
 import { useAudio } from '../../context/AudioContext';
 
-const PlayerBar = ({
-  onToggleQueue,
-  sidebarWidth = 240, // Default width if not provided
-}) => {
+const PlayerBar = ({ onToggleQueue }) => {
   const {
     currentTrack,
     isPlaying,
@@ -20,6 +17,10 @@ const PlayerBar = ({
     playTrack,
     queue,
     setQueue,
+    shuffle,
+    repeatMode,
+    toggleShuffle,
+    cycleRepeat,
   } = useAudio();
   const theme = useTheme();
 
@@ -64,10 +65,11 @@ const PlayerBar = ({
   
   return (
     <Box
+      className="player"
       sx={{
         position: 'fixed',
         bottom: 0,
-        left: `${sidebarWidth}px`,
+        left: 0,
         right: 0,
         height: '96px',
         paddingTop: '4px',
@@ -113,6 +115,9 @@ const PlayerBar = ({
         maxWidth: '40%',
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', mt: '4px' }}>
+          <IconButton size="small" onClick={toggleShuffle} sx={{ color: shuffle ? theme.palette.primary.main : 'inherit' }}>
+            <Shuffle />
+          </IconButton>
           <IconButton size="small" onClick={handlePrevious}>
             <SkipPrevious />
           </IconButton>
@@ -131,6 +136,9 @@ const PlayerBar = ({
           </IconButton>
           <IconButton size="small" onClick={handleNext}>
             <SkipNext />
+          </IconButton>
+          <IconButton size="small" onClick={cycleRepeat} sx={{ color: repeatMode ? theme.palette.primary.main : 'inherit' }}>
+            {repeatMode === 2 ? <RepeatOne /> : <Repeat />}
           </IconButton>
         </Box>
         <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}>

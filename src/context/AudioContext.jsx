@@ -13,7 +13,14 @@ export const AudioProvider = ({ children }) => {
   const [progress, setProgress] = useState(0); // 0-100 percentage
   const [duration, setDuration] = useState(0);
   const [queue, setQueue] = useState([]);
+  const [shuffle, setShuffle] = useState(false); // shuffle enable flag
+  const [repeatMode, setRepeatMode] = useState(0); // 0 = none, 1 = all, 2 = one
+  const originalQueueRef = useRef([]); // keep snapshot for repeat all
   const progressInterval = useRef(null);
+  // refs to keep latest mutable values inside event callbacks
+  const queueRef = useRef(queue);
+  const repeatModeRef = useRef(repeatMode);
+  const currentTrackRef = useRef(currentTrack);
 
   // --- helpers ---
   const clearProgressTimer = () => {
@@ -51,11 +58,17 @@ export const AudioProvider = ({ children }) => {
     // Stop existing timers and reset UI immediately
     clearProgressTimer();
     setProgress(0);
-    setDuration(parseDurationToSeconds(track.duration));
+    const initialDur = parseDurationToSeconds(track.duration);
+    setDuration(initialDur);
     setIsPlaying(false);
     setCurrentTrack(track);
-    // apply volume first so playback starts at desired level
+    // start playback
     await YouTubePlayer.play(track.id, volume);
+    if (!initialDur) {
+      // get actual duration once metadata loaded
+      const dur = await YouTubePlayer.getDuration();
+      if (dur) setDuration(dur);
+    }
   }, [volume]);
 
   const togglePlay = useCallback(async () => {
@@ -80,7 +93,19 @@ export const AudioProvider = ({ children }) => {
     await YouTubePlayer.setVolume(vol);
   }, []);
 
-  // events from player
+  // sync refs
+  useEffect(() => { queueRef.current = queue; }, [queue]);
+  useEffect(() => { repeatModeRef.current = repeatMode; }, [repeatMode]);
+  useEffect(() => { currentTrackRef.current = currentTrack; }, [currentTrack]);
+
+  // keep original queue snapshot when not shuffling
+  useEffect(() => {
+    if (!shuffle) {
+      originalQueueRef.current = queue;
+    }
+  }, [queue, shuffle]);
+
+  // events from player – register once
   useEffect(() => {
     const onPlay = () => {
       setIsPlaying(true);
@@ -93,11 +118,23 @@ export const AudioProvider = ({ children }) => {
     const onEnded = () => {
       setIsPlaying(false);
       clearProgressTimer();
-      // auto next
-      if (queue.length) {
-        const [next, ...rest] = queue;
+      const mode = repeatModeRef.current;
+  const q = queueRef.current;
+  const trackNow = currentTrackRef.current;
+  if (mode === 2) {
+        // repeat single – clone object to force state update
+        playTrack({ ...trackNow });
+        return;
+      }
+      if (q.length) {
+        const [next, ...rest] = q;
         setQueue(rest);
         playTrack(next);
+      } else if (mode === 1 && originalQueueRef.current.length) {
+        // repeat all
+        const [first, ...rest] = originalQueueRef.current;
+        setQueue(rest);
+        playTrack(first);
       }
     };
     YouTubePlayer.on('play', onPlay);
@@ -107,9 +144,9 @@ export const AudioProvider = ({ children }) => {
       YouTubePlayer.off('play', onPlay);
       YouTubePlayer.off('pause', onPause);
       YouTubePlayer.off('ended', onEnded);
-      clearProgressTimer();
+      // do not clear progress timer here; onPause/onEnded will manage
     };
-  }, [queue, playTrack]);
+  }, []);
 
   const value = {
     currentTrack,
@@ -124,6 +161,29 @@ export const AudioProvider = ({ children }) => {
     seek,
     changeVolume,
     setQueue,
+    shuffle,
+    repeatMode,
+    toggleShuffle: () => setShuffle(prev => {
+      if (!prev) {
+        // turning ON: snapshot current order and shuffle queue
+        originalQueueRef.current = [...queue];
+        const shuffled = [...queue];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        setQueue(shuffled);
+      } else {
+        // turning OFF: restore original order continuing after current track
+        if (originalQueueRef.current.length) {
+          const idx = originalQueueRef.current.findIndex(t => t.id === currentTrack?.id);
+          const nextQueue = idx >= 0 ? originalQueueRef.current.slice(idx + 1) : originalQueueRef.current;
+          setQueue(nextQueue);
+        }
+      }
+      return !prev;
+    }),
+    cycleRepeat: () => setRepeatMode(prev => (prev + 1) % 3),
   };
 
   return <AudioContext.Provider value={value}>{children}</AudioContext.Provider>;

@@ -4,16 +4,16 @@ const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#FF0000',
-      light: '#FF4D4D',
-      dark: '#CC0000',
+      main: '#CD201F',
+      light: '#e75654',
+      dark: '#9e1917',
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#FF0000',
+      main: '#CD201F',
     },
     error: {
-      main: '#FF0000',
+      main: '#CD201F',
     },
     background: {
       default: '#0F0F0F',
@@ -25,7 +25,7 @@ const theme = createTheme({
       styleOverrides: {
         containedPrimary: {
           '&:hover': {
-            backgroundColor: '#CC0000',
+            backgroundColor: '#9e1917',
           },
         },
       },
@@ -34,7 +34,7 @@ const theme = createTheme({
       styleOverrides: {
         thumb: {
           '&:hover, &.Mui-focusVisible': {
-            boxShadow: '0px 0px 0px 8px rgba(255, 0, 0, 0.16)',
+            boxShadow: '0px 0px 0px 8px rgba(205, 32, 31, 0.16)',
           },
         },
       },

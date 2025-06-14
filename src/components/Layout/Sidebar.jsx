@@ -72,6 +72,7 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick, sidebarWidth, o
 
   return (
     <Box
+      className="sidebar"
       ref={sidebarRef}
       sx={{
         width: sidebarWidth,
@@ -86,10 +87,10 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick, sidebarWidth, o
       <Box
         sx={{
           position: 'absolute',
-          right: 0,
+          right: '-1px',
           top: 0,
           bottom: 0,
-          width: '4px',
+          width: '2px',
           cursor: 'col-resize',
           '&:hover': {
             backgroundColor: 'var(--essential-bright-accent)',

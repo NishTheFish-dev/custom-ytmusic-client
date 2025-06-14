@@ -136,7 +136,7 @@ function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <div className="app-container">
+      <div className={`app-container ${showQueue ? 'queue-open' : ''}`}>
         {!isAuthenticated ? (
           <AuthComponent onAuthSuccess={handleAuthSuccess} />
         ) : (
@@ -161,7 +161,7 @@ function App() {
               </div>
             </div>
 
-            <PlayerBar onToggleQueue={handleToggleQueue} sidebarWidth={sidebarWidth} />
+            <PlayerBar onToggleQueue={handleToggleQueue} />
 
             {showQueue && (
               <QueuePanel
