@@ -96,13 +96,14 @@ function App() {
       case 'home':
         return <Box sx={{ p: 3 }}>Home Content</Box>;
       case 'search':
-        return <SearchResults results={searchResults} query={searchQuery} />;
+        return <SearchResults results={searchResults} query={searchQuery} isQueueOpen={showQueue} />;
       case 'library':
         return <Playlists onPlaylistClick={handleSidebarPlaylistClick} />;
       case 'playlist':
         return selectedPlaylist ? (
           <PlaylistTracks
             playlist={selectedPlaylist}
+            isQueueOpen={showQueue}
           />
         ) : null;
       default:

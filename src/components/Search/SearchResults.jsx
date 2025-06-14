@@ -3,6 +3,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useAudio } from '../../context/AudioContext';
 import { youtubeApi } from '../../services/youtubeApi';
+
 import {
   Box,
   List,
@@ -21,7 +22,12 @@ import {
  *   results: array – array of video objects returned from YouTube search
  *   query: string – original search query (used for heading)
  */
-const SearchResults = ({ results = [], query = '' }) => {
+const SearchResults = ({ results = [], query = '', isQueueOpen = false }) => {
+  const truncateTitle = (title) => {
+    if (!isQueueOpen) return title;
+    const maxLength = 30; // Match the same length as PlaylistTracks
+    return title.length > maxLength ? `${title.substring(0, maxLength)}...` : title;
+  };
   const { playTrack, setQueue } = useAudio();
   if (!query) {
     return (
@@ -118,9 +124,10 @@ const SearchResults = ({ results = [], query = '' }) => {
                 />
               </ListItemAvatar>
               <ListItemText
-                primary={track.title}
+              sx={{ minWidth: 0 }}
+                primary={truncateTitle(track.title)}
                 secondary={track.artist}
-                primaryTypographyProps={{ color: 'var(--text-base)' }}
+                primaryTypographyProps={{ sx: { color: 'var(--text-base)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}
                 secondaryTypographyProps={{ color: 'var(--text-subdued)' }}
               />
               <IconButton size="small" onClick={handlePlayClick} sx={{ ml: 1 }}>

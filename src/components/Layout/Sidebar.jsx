@@ -46,7 +46,7 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
       className="sidebar"
       sx={{
         width: 'var(--sidebar-width)',
-        height: '100%',
+        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: 'var(--background-base)',
@@ -56,7 +56,7 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
     >
 
       
-      <Box sx={{ flex: 1, overflowY: 'auto', px: 1, pb: 'var(--player-height)' }}>
+      <Box sx={{ flex: 1, overflowY: 'auto', px: 1, pb: 'calc(var(--player-height) + 6px)' }}>
         {/* Sticky header */}
         <Box sx={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--background-base)', pt: 4, pb: 1 }}>
           <Typography variant="h6" sx={{ color: 'var(--text-base)', px: 1, mb: 1, fontWeight: 700, ml: 1 }}>

@@ -136,6 +136,7 @@ code {
   flex: 1;
   overflow: auto;
   padding: 24px;
+  padding-bottom: calc(var(--player-height) + 6px);
 }
 
 .topbar {

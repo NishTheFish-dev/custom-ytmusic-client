@@ -7,7 +7,6 @@ import {
   ListItemText,
   ListItemAvatar,
   Avatar,
-  IconButton,
   Divider,
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -104,7 +103,7 @@ const QueuePanel = ({
         </>
       )}
 
-      <List sx={{ flex: 1, overflow: 'auto' }}>
+      <List sx={{ flex: 1, overflow: 'auto', pb: 'calc(var(--player-height) + 6px)' }}>
         {queue.map((track, index) => (
           <ListItem
             key={track.id}
@@ -112,12 +111,6 @@ const QueuePanel = ({
               px: 2,
               '&:hover': {
                 backgroundColor: 'var(--background-highlight)',
-                '& .play-button': {
-                  opacity: 1,
-                },
-                '& .more-button': {
-                  opacity: 1,
-                },
               },
             }}
           >
@@ -145,31 +138,6 @@ const QueuePanel = ({
                 },
               }}
             />
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                opacity: 0,
-                transition: 'opacity 0.2s ease',
-              }}
-            >
-              <IconButton
-                size="small"
-                className="play-button"
-                onClick={() => onTrackPlay(track)}
-                sx={{ color: 'var(--text-base)' }}
-              >
-                <PlayArrowIcon />
-              </IconButton>
-              <IconButton
-                size="small"
-                className="more-button"
-                onClick={() => onTrackRemove(track)}
-                sx={{ color: 'var(--text-subdued)' }}
-              >
-                <MoreVertIcon />
-              </IconButton>
-            </Box>
           </ListItem>
         ))}
       </List>

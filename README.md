@@ -18,12 +18,13 @@ An unofficial custom desktop client for YouTube Music built with React.js and El
 - Equalizer & audio effects panel
 - Light theme & theme switcher
 - Lyrics fetcher (YT captions / external services)
-- Settings window with hot-key customisation and proxy options
+- Settings window with hot-key customisation
 
 ## Version History
 
 | Version | Date       | Highlights |
 |---------|------------|------------|
+| v0.2.2  | 2025-06-14 | • Added responsive title truncation based on queue state  <br>• Fixed playlist scroll area to extend fully to bottom player bar  <br>• Added consistent bottom padding across all scrollable areas  <br>• Improved layout behavior when queue is toggled  <br>• Slight bugfix for removing invisible buttons from songs in queue |
 | v0.2.1  | 2025-06-14 | • Added play & overflow controls to search results  <br>• Fixed duration/progress not updating when playing from search  <br>• Instant UI reset when switching tracks |
 | v0.2.0  | 2025-06-14 | Initial search feature: query typing, result list, playback, queue building |
 | v0.1.2  | 2025-06-13 | Minor UI polish, better error handling |
