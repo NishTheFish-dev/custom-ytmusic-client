@@ -37,10 +37,24 @@ export const AudioProvider = ({ children }) => {
   };
 
   // --- playback api exposed to consumers ---
+  const parseDurationToSeconds = (dur) => {
+    if (typeof dur === 'number') return dur;
+    if (typeof dur !== 'string') return 0;
+    const parts = dur.split(':').map(Number);
+    if (parts.length === 2) return parts[0] * 60 + parts[1];
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    return 0;
+  };
+
   const playTrack = useCallback(async (track) => {
     if (!track) return;
-    // apply volume first so playback starts at desired level
+    // Stop existing timers and reset UI immediately
+    clearProgressTimer();
+    setProgress(0);
+    setDuration(parseDurationToSeconds(track.duration));
+    setIsPlaying(false);
     setCurrentTrack(track);
+    // apply volume first so playback starts at desired level
     await YouTubePlayer.play(track.id, volume);
   }, [volume]);
 

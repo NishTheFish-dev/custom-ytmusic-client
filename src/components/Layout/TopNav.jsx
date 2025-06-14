@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, IconButton, TextField, InputAdornment } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import SearchIcon from '@mui/icons-material/Search';
 
 const TopNav = ({ onHomeClick, onSearch }) => {
+  const [searchText, setSearchText] = useState('');
   return (
     <Box
       sx={{
@@ -35,11 +36,24 @@ const TopNav = ({ onHomeClick, onSearch }) => {
         size="small"
         fullWidth
         sx={{ maxWidth: 600 }}
-        onChange={(e) => onSearch(e.target.value)}
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            onSearch(searchText);
+          }
+        }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
               <SearchIcon sx={{ color: 'var(--text-subdued)' }} />
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={() => onSearch(searchText)}>
+                <SearchIcon sx={{ color: 'var(--text-subdued)' }} />
+              </IconButton>
             </InputAdornment>
           ),
           sx: {

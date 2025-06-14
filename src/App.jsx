@@ -14,6 +14,8 @@ import { useAudio } from './context/AudioContext';
 import { youtubeApi } from './services/youtubeApi';
 import './index.css';
 import AutoSizer from 'react-virtualized-auto-sizer';
+import SearchResults from './components/Search/SearchResults';
+import { searchService } from './services/searchService';
 
 const darkTheme = createTheme({
   typography: {
@@ -42,6 +44,8 @@ function App() {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [sidebarWidth, setSidebarWidth] = useState(240);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -67,9 +71,19 @@ function App() {
     setSelectedPlaylist(playlist);
   };
 
-  const handleSearch = (query) => {
-    // TODO: Implement search functionality
-    console.log('Search query:', query);
+  const handleSearch = async (query) => {
+    setSearchQuery(query);
+    if (!query || query.trim().length === 0) {
+      setCurrentView('home');
+      return;
+    }
+    try {
+      const results = await searchService.search(query);
+      setSearchResults(results);
+      setCurrentView('search');
+    } catch (error) {
+      console.error('Search failed:', error);
+    }
   };
 
   const handleHomeClick = () => {
@@ -82,7 +96,7 @@ function App() {
       case 'home':
         return <Box sx={{ p: 3 }}>Home Content</Box>;
       case 'search':
-        return <Box sx={{ p: 3 }}>Search Content</Box>;
+        return <SearchResults results={searchResults} query={searchQuery} />;
       case 'library':
         return <Playlists onPlaylistClick={handleSidebarPlaylistClick} />;
       case 'playlist':

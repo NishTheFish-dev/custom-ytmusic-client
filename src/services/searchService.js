@@ -9,8 +9,11 @@ class SearchService {
 
   async search(query, type = 'all') {
     try {
-      const response = await youtubeApi.search(query, type);
-      this.searchResults = response.data.items;
+      const response = await youtubeApi.searchVideos(query, 25);
+      // The electron bridge may return either an object with an `items` array (YouTube Data API response)
+      // or a plain array of results. Handle both cases gracefully.
+      const items = Array.isArray(response) ? response : response.items || response.data?.items || [];
+      this.searchResults = items;
       this.addToSearchHistory(query);
       return this.searchResults;
     } catch (error) {
