@@ -4,11 +4,11 @@ import AddIcon from '@mui/icons-material/Add';
 import { playlistService } from '../../services/playlistService';
 import { preferencesService } from '../../services/preferencesService';
 
-const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
+const Sidebar = ({ currentView, setCurrentView, onPlaylistClick, sidebarWidth, onWidthChange }) => {
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sidebarWidth, setSidebarWidth] = useState(240);
+  
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef(null);
   const maxWidth = 400; // 1/4 of default app width (1600)
@@ -20,7 +20,7 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
   useEffect(() => {
     const loadPreferences = async () => {
       const preferences = await preferencesService.getPreferences();
-      setSidebarWidth(preferences.sidebarWidth);
+      onWidthChange?.(preferences.sidebarWidth);
     };
     loadPreferences();
   }, []);
@@ -50,7 +50,7 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
 
       const newWidth = e.clientX;
       if (newWidth >= 200 && newWidth <= maxWidth) {
-        setSidebarWidth(newWidth);
+        onWidthChange?.(newWidth);
         await preferencesService.updateSidebarWidth(newWidth);
       }
     };
@@ -100,9 +100,12 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
       />
       
       <Box sx={{ flex: 1, overflowY: 'auto', px: 1 }}>
-        <Typography variant="h6" sx={{ color: 'var(--text-base)', px: 1, mb: 1, fontWeight: 700, mt: 4, ml: 1 }}>
-          Your Playlists
-        </Typography>
+        {/* Sticky header */}
+        <Box sx={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--background-base)', pt: 4, pb: 1 }}>
+          <Typography variant="h6" sx={{ color: 'var(--text-base)', px: 1, mb: 1, fontWeight: 700, ml: 1 }}>
+            Your Playlists
+          </Typography>
+        </Box>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 100 }}>
             <CircularProgress size={24} sx={{ color: 'var(--text-base)' }} />

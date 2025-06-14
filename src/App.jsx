@@ -40,6 +40,7 @@ function App() {
   const [showQueue, setShowQueue] = useState(false);
   // queue handled by AudioContext
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [sidebarWidth, setSidebarWidth] = useState(240);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -127,7 +128,13 @@ function App() {
         ) : (
           <>
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-              <Sidebar currentView={currentView} setCurrentView={setCurrentView} onPlaylistClick={handleSidebarPlaylistClick} />
+              <Sidebar
+                currentView={currentView}
+                setCurrentView={setCurrentView}
+                onPlaylistClick={handleSidebarPlaylistClick}
+                sidebarWidth={sidebarWidth}
+                onWidthChange={setSidebarWidth}
+              />
               <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <TopNav onHomeClick={handleHomeClick} onSearch={handleSearch} />
                 <div className="content" style={{ 
@@ -140,7 +147,7 @@ function App() {
               </div>
             </div>
 
-            <PlayerBar onToggleQueue={handleToggleQueue} />
+            <PlayerBar onToggleQueue={handleToggleQueue} sidebarWidth={sidebarWidth} />
 
             {showQueue && (
               <QueuePanel

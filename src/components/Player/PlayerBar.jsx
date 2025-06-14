@@ -69,8 +69,8 @@ const PlayerBar = ({
         bottom: 0,
         left: `${sidebarWidth}px`,
         right: 0,
-        height: '80px',
-        paddingTop: '8px',
+        height: '96px',
+        paddingTop: '4px',
         backgroundColor: 'var(--background-base)',
         borderTop: '1px solid var(--background-tinted-base)',
         display: 'flex',
@@ -112,7 +112,7 @@ const PlayerBar = ({
         flex: 1,
         maxWidth: '40%',
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', mt: '4px' }}>
           <IconButton size="small" onClick={handlePrevious}>
             <SkipPrevious />
           </IconButton>

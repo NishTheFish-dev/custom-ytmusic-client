@@ -67,43 +67,57 @@ const Playlists = ({ onPlaylistClick, onPlayClick }) => {
   }
 
   return (
-    <Box sx={{ padding: 3 }}>
-      <Typography
-        variant="h4"
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      {/* Sticky header */}
+      <Box
         sx={{
-          color: 'var(--text-base)',
-          marginBottom: 3,
-          fontWeight: 700,
+          px: 3,
+          py: 3,
+          position: 'sticky',
+          top: 0,
+          zIndex: 2,
+          background: 'var(--background, #121212)',
         }}
       >
-        Your Playlists
-      </Typography>
-
-      {playlists.length === 0 ? (
         <Typography
-          variant="body1"
+          variant="h4"
           sx={{
-            color: 'var(--text-subdued)',
-            textAlign: 'center',
-            marginTop: 4,
+            color: 'var(--text-base)',
+            fontWeight: 700,
           }}
         >
-          No playlists found. Create your first playlist on YouTube Music!
+          Your Playlists
         </Typography>
-      ) : (
-        <AlbumGrid
-          items={playlists.map(playlist => ({
-            id: playlist.id,
-            title: playlist.title,
-            subtitle: `${playlist.itemCount} songs • ${playlist.channelTitle}`,
-            thumbnail: playlist.thumbnail,
-          }))}
-          onItemClick={onPlaylistClick}
-          onPlayClick={onPlayClick}
-        />
-      )}
+      </Box>
+
+      {/* Scrollable playlists list */}
+      <Box sx={{ flex: 1, overflowY: 'auto', px: 3, pb: 3 }}>
+        {playlists.length === 0 ? (
+          <Typography
+            variant="body1"
+            sx={{
+              color: 'var(--text-subdued)',
+              textAlign: 'center',
+              marginTop: 4,
+            }}
+          >
+            No playlists found. Create your first playlist on YouTube Music!
+          </Typography>
+        ) : (
+          <AlbumGrid
+            items={playlists.map(playlist => ({
+              id: playlist.id,
+              title: playlist.title,
+              subtitle: `${playlist.itemCount} songs • ${playlist.channelTitle}`,
+              thumbnail: playlist.thumbnail,
+            }))}
+            onItemClick={onPlaylistClick}
+            onPlayClick={onPlayClick}
+          />
+        )}
+      </Box>
     </Box>
   );
 };
 
-export default Playlists; 
+export default Playlists;
