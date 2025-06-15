@@ -594,6 +594,12 @@ async function createWindow() {
   mainWindow = new BrowserWindow({
     width: windowBounds.width,
     height: windowBounds.height,
+    frame: true, // Keep the title bar
+    titleBarStyle: 'hidden', // Hide the default title bar but keep window controls
+    titleBarOverlay: {
+      color: '#121212', // Match the app's background color
+      symbolColor: '#ffffff' // Color of the window controls (minimize, maximize, close)
+    },
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -602,6 +608,7 @@ async function createWindow() {
       preload: preloadPath,
       enableRemoteModule: false
     },
+    backgroundColor: '#121212', // Match the app's background color
     show: false
   });
 
