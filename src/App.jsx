@@ -40,7 +40,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState('home');
   // currentTrack handled by AudioContext
-  const [showQueue, setShowQueue] = useState(false);
+  const [showQueue, setShowQueue] = useState(true);
   // queue handled by AudioContext
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [sidebarWidth, setSidebarWidth] = useState(240);

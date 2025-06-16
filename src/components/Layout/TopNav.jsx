@@ -13,7 +13,6 @@ const TopNav = ({ onHomeClick, onSearch }) => {
         top: 0,
         left: 'var(--sidebar-width)',
         right: 0,
-
         height: 64,
         display: 'flex',
         alignItems: 'center',
@@ -22,6 +21,12 @@ const TopNav = ({ onHomeClick, onSearch }) => {
         backgroundColor: 'var(--background-base)',
         borderBottom: '1px solid var(--background-highlight)',
         gap: 2,
+        WebkitAppRegion: 'drag',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
+        '& > *': {
+          WebkitAppRegion: 'no-drag',
+        },
       }}
     >
       <IconButton
@@ -31,6 +36,7 @@ const TopNav = ({ onHomeClick, onSearch }) => {
           '&:hover': {
             backgroundColor: 'var(--background-highlight)',
           },
+          WebkitAppRegion: 'no-drag',
         }}
       >
         <HomeIcon />
@@ -52,7 +58,12 @@ const TopNav = ({ onHomeClick, onSearch }) => {
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <IconButton onClick={() => { if (searchText.trim()) onSearch(searchText); }}>
+              <IconButton 
+                onClick={() => { if (searchText.trim()) onSearch(searchText); }}
+                sx={{
+                  WebkitAppRegion: 'no-drag',
+                }}
+              >
                 <SearchIcon sx={{ color: 'var(--text-subdued)' }} />
               </IconButton>
             </InputAdornment>

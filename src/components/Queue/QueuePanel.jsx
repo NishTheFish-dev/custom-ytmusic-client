@@ -34,20 +34,41 @@ const QueuePanel = ({
         zIndex: 900,
       }}
     >
-      <Box sx={{ p: 2 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            color: 'var(--text-base)',
-            fontSize: '1rem',
-            fontWeight: 700,
-          }}
-        >
-          Queue
-        </Typography>
+      {/* Draggable area at the top of the queue panel */}
+      <Box 
+        sx={{
+          height: '24px',
+          WebkitAppRegion: 'drag',
+          WebkitUserSelect: 'none',
+          userSelect: 'none',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 2,
+        }}
+      />
+      <Box sx={{ 
+        pt: 3, 
+        pb: 2, 
+        px: 0,
+        position: 'relative',
+        zIndex: 1,
+      }}>
+        <Box sx={{ px: 2, mb: 1.5 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              color: 'var(--text-base)',
+              fontSize: '1rem',
+              fontWeight: 700,
+            }}
+          >
+            Queue
+          </Typography>
+        </Box>
+        <Divider sx={{ borderColor: 'var(--background-highlight)', m: 0 }} />
       </Box>
-
-      <Divider sx={{ borderColor: 'var(--background-highlight)' }} />
 
       {currentTrack && (
         <>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { List, ListItem, ListItemIcon, ListItemText, Box, Avatar, Typography, CircularProgress } from '@mui/material';
+import { List, ListItem, ListItemIcon, ListItemText, Box, Avatar, Typography, CircularProgress, Divider } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { playlistService } from '../../services/playlistService';
 import { preferencesService } from '../../services/preferencesService';
@@ -53,18 +53,47 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: 'var(--background-base)',
-        /* Fixed width sidebar, no resizer */
         position: 'relative',
       }}
     >
-
+      {/* Draggable area at the top of the sidebar */}
+      <Box 
+        sx={{
+          height: '24px',
+          WebkitAppRegion: 'drag',
+          WebkitUserSelect: 'none',
+          userSelect: 'none',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 2,
+        }}
+      />
       
-      <Box sx={{ flex: 1, overflowY: 'auto', px: 1, pb: 'calc(var(--player-height) + 6px)' }}>
+      <Box sx={{ 
+        flex: 1, 
+        overflowY: 'auto', 
+        px: 0, 
+        pb: 'calc(var(--player-height) + 6px)',
+        position: 'relative',
+        zIndex: 1,
+      }}>
         {/* Sticky header */}
-        <Box sx={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--background-base)', pt: 4, pb: 1 }}>
-          <Typography variant="h6" sx={{ color: 'var(--text-base)', px: 1, mb: 1, fontWeight: 700, ml: 1 }}>
-            Your Playlists
-          </Typography>
+        <Box sx={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--background-base)' }}>
+          <Box sx={{ px: 2, py: 1, borderBottom: '1px solid var(--background-highlight)' }}>
+            <Typography
+              variant="h6"
+              sx={{
+                color: 'var(--text-base)',
+                fontSize: '1rem',
+                fontWeight: 700,
+                lineHeight: 1.5,
+              }}
+            >
+              Your Playlists
+            </Typography>
+          </Box>
         </Box>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 100 }}>
