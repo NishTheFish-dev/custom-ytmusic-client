@@ -19,6 +19,7 @@ const PLAYER_BAR_HEIGHT = 90;
 const STICKY_HEADER_HEIGHT = 152; // px (120px image + 2*16px py + margins)
 
 const PlaylistTracks = ({ playlist, isQueueOpen }) => {
+  
   const truncateTitle = (title) => {
     if (!isQueueOpen) return title;
     const maxLength = 30; // Adjust based on your layout
@@ -283,11 +284,11 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
     );
   };
 
-  // Only one playlist info section, make it sticky (remove any outer/first instance)
+  // Main layout container
   return (
     <>
-      {/* Playlist Info (sticky) */}
-      <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
+        {/* Playlist header */}
         <Box sx={{ display: 'flex', alignItems: 'center', px: 4, py: 4, position: 'sticky', top: 0, zIndex: 2, background: 'var(--background, #181818)' }}>
           <img
             src={playlist?.thumbnail}

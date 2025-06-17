@@ -23,7 +23,7 @@ const QueuePanel = ({
     <Box className="queue-panel"
       sx={{
         position: 'fixed',
-        top: 0,
+        top: 'var(--topbar-height)',
         right: 0,
         bottom: 'calc(var(--player-height) + 6px)',
         width: 'var(--queue-width)',
@@ -34,20 +34,7 @@ const QueuePanel = ({
         zIndex: 900,
       }}
     >
-      {/* Draggable area at the top of the queue panel */}
-      <Box 
-        sx={{
-          height: '24px',
-          WebkitAppRegion: 'drag',
-          WebkitUserSelect: 'none',
-          userSelect: 'none',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 2,
-        }}
-      />
+
       <Box sx={{ 
         pt: 3, 
         pb: 2, 

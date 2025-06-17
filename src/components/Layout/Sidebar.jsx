@@ -49,32 +49,20 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
       className="sidebar"
       sx={{
         width: 'var(--sidebar-width)',
-        height: '100vh',
+        height: 'calc(100vh - var(--topbar-height))',
+        marginTop: 'var(--topbar-height)',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: 'var(--background-base)',
         position: 'relative',
       }}
     >
-      {/* Draggable area at the top of the sidebar */}
-      <Box 
-        sx={{
-          height: '24px',
-          WebkitAppRegion: 'drag',
-          WebkitUserSelect: 'none',
-          userSelect: 'none',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 2,
-        }}
-      />
+
       
       <Box sx={{ 
         flex: 1, 
         overflowY: 'auto', 
-        px: 0, 
+        px: 0,
         pb: 'calc(var(--player-height) + 6px)',
         position: 'relative',
         zIndex: 1,

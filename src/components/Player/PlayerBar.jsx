@@ -90,7 +90,7 @@ const PlayerBar = ({ onToggleQueue }) => {
       }}
     >
       {/* Track Info */}
-      <Box sx={{ display: 'flex', alignItems: 'center', width: '30%' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', width: '30%', minWidth: 0, flexShrink: 1 }}>
         {hasTrack ? (
           <>
             <img
@@ -98,11 +98,31 @@ const PlayerBar = ({ onToggleQueue }) => {
               alt={currentTrack.title}
               style={{ width: '56px', height: '56px', objectFit: 'cover', marginRight: '16px' }}
             />
-            <Box>
-              <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600, fontSize: '1rem' }}>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: { xs: '140px', sm: '220px', md: '280px', lg: '320px' },
+                }}
+              >
                 {currentTrack.title}
               </Typography>
-              <Typography variant="body2" color="text.secondary" noWrap sx={{ fontSize: '0.9rem' }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  fontSize: '0.9rem',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: { xs: '140px', sm: '220px', md: '280px', lg: '320px' },
+                }}
+              >
                 {currentTrack.artist}
               </Typography>
             </Box>

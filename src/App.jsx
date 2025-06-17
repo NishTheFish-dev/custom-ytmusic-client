@@ -171,12 +171,23 @@ function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <div className={`app-container ${showQueue ? 'queue-open' : ''}`}>
+      <div className="app-container" style={{ 
+        position: 'relative',
+        height: '100vh',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
         {!isAuthenticated ? (
           <AuthComponent onAuthSuccess={handleAuthSuccess} />
         ) : (
           <>
-            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+            <div style={{ 
+              display: 'flex', 
+              flex: 1, 
+              overflow: 'hidden',
+              position: 'relative'
+            }}>
               <Sidebar
                 currentView={currentView}
                 setCurrentView={setCurrentView}
@@ -184,7 +195,14 @@ function App() {
                 sidebarWidth={sidebarWidth}
                 onWidthChange={setSidebarWidth}
               />
-              <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <div className="main-content" style={{ 
+                flex: 1, 
+                display: 'flex', 
+                flexDirection: 'column',
+                width: '100%',
+                paddingRight: showQueue ? 'var(--queue-width)' : 0,
+                overflow: 'hidden'
+              }}>
                 <TopNav onHomeClick={handleHomeClick} onSearch={handleSearch} />
                 <div className="content" style={{ 
                   flex: 1, 
@@ -198,12 +216,29 @@ function App() {
 
             <PlayerBar onToggleQueue={handleToggleQueue} />
 
-            {showQueue && (
-              <QueuePanel
-                queue={queue}
-                currentTrack={currentTrack}
-              />
-            )}
+            <Box sx={{
+              position: 'fixed',
+              top: 'var(--topbar-height)',
+              right: showQueue ? 0 : 'var(--queue-width, 0px)',
+              bottom: 'var(--player-height, 0px)',
+              width: 'var(--queue-width, 0px)',
+
+              zIndex: 900,
+              backgroundColor: 'var(--background-base)',
+              borderLeft: '1px solid var(--background-highlight)',
+              overflowY: 'auto',
+              visibility: showQueue ? 'visible' : 'hidden'
+            }}>
+              {showQueue && (
+                <QueuePanel
+                  queue={queue}
+                  currentTrack={currentTrack}
+                  onTrackClick={(track) => {}}
+                  onTrackPlay={(track) => {}}
+                  onTrackRemove={(track) => {}}
+                />
+              )}
+            </Box>
           </>
         )}
       </div>
@@ -211,4 +246,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;

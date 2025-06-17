@@ -23,6 +23,7 @@ import {
  *   query: string – original search query (used for heading)
  */
 const SearchResults = ({ results = [], query = '', isQueueOpen = false }) => {
+
   const truncateTitle = (title) => {
     if (!isQueueOpen) return title;
     const maxLength = 30; // Match the same length as PlaylistTracks
