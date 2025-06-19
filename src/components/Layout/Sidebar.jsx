@@ -49,11 +49,15 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
       className="sidebar"
       sx={{
         width: 'var(--sidebar-width)',
-        height: 'calc(100vh - var(--topbar-height))',
+        height: 'calc(100vh - var(--topbar-height) - var(--player-height))',
         marginTop: 'var(--topbar-height)',
+        marginRight: 'var(--sidebar-gap)',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: 'var(--background-base)',
+        backgroundColor: 'var(--background-elevated-base)',
+        border: '1px solid var(--background-highlight)',
+        borderRadius: 2,
+        overflow: 'hidden',
         position: 'relative',
       }}
     >
@@ -63,12 +67,12 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
         flex: 1, 
         overflowY: 'auto', 
         px: 0,
-        pb: 'calc(var(--player-height) + 6px)',
+        pb: 0,
         position: 'relative',
         zIndex: 1,
       }}>
         {/* Sticky header */}
-        <Box sx={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--background-base)' }}>
+        <Box sx={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--background-elevated-base)' }}>
           <Box sx={{ px: 2, py: 1, borderBottom: '1px solid var(--background-highlight)' }}>
             <Typography
               variant="h6"

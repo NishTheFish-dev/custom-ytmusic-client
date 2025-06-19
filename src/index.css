@@ -21,6 +21,8 @@
   --topbar-height: 64px;
   --player-height: 90px;
   --scrollbar-size: 8px;
+  --scrollbar-thumb: #000;
+  --sidebar-gap: 8px;
 }
 
 * {
@@ -68,7 +70,7 @@ code {
 
 /* Layout */
 .queue-open .content {
-  margin-right: var(--queue-width);
+  margin-right: calc(var(--queue-width) + var(--sidebar-gap));
 }
 
 
@@ -85,9 +87,9 @@ code {
   width: var(--sidebar-width);
   scrollbar-gutter: stable; /* reserve scrollbar space */
   background-color: var(--background-base);
-  border-right: 1px solid var(--background-tinted-base);
-  padding: 24px 12px;
-  padding-bottom: var(--player-height);
+  /* border no longer needed inside card */
+  padding: 24px 12px 0;
+
   overflow-y: auto;
 
   /* Hide scrollbar until hover */
@@ -99,13 +101,17 @@ code {
 }
 
 .sidebar::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
 }
 
-.sidebar:hover::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  transition: background-color 0.2s ease;
+}
+
+.sidebar:hover::-webkit-scrollbar-thumb {
+  background-color: var(--background-tinted-base);
 }
 
 /* Queue panel scrollbar visibility */
@@ -130,19 +136,29 @@ code {
   flex-direction: column;
   overflow: hidden;
   margin-top: var(--topbar-height);
+
 }
 
 .content {
   flex: 1;
   overflow: auto;
   padding: 24px;
-  padding-bottom: calc(var(--player-height) + 6px);
+  /* ensure content doesn't hide under player on scroll */
+  scroll-padding-bottom: calc(var(--player-height) + 6px);
+  padding-bottom: 0;
+
+  /* Card styling to match sidebars */
+  background-color: var(--background-base);
+  border: 1px solid var(--background-tinted-base);
+  border-radius: 8px;
+  margin: var(--sidebar-gap) var(--sidebar-gap) 0 0;
+  box-sizing: border-box;
 }
 
 .topbar {
   position: fixed;
   top: 0;
-  left: var(--sidebar-width);
+  left: calc(var(--sidebar-width) + var(--sidebar-gap));
   right: 0;
   height: var(--topbar-height);
   background-color: var(--background-base);
@@ -179,7 +195,7 @@ code {
 /* Material-UI Overrides */
 .MuiDrawer-paper {
   background-color: var(--background-base) !important;
-  border-right: 1px solid var(--background-tinted-base) !important;
+  border-right: none !important;
   width: var(--sidebar-width) !important;
 }
 
@@ -363,12 +379,11 @@ code {
 }
 
 .sidebar *::-webkit-scrollbar-thumb {
-  background-color: transparent;
+  background-color: var(--scrollbar-thumb);
   transition: background-color 0.2s ease;
 }
 .sidebar:hover *::-webkit-scrollbar-thumb {
   background-color: var(--background-tinted-base);
-  
 }
 
 
@@ -387,18 +402,28 @@ code {
 }
 
 .queue-panel *::-webkit-scrollbar-thumb {
-  background-color: transparent;
+  background-color: var(--scrollbar-thumb);
   transition: background-color 0.2s ease;
 }
 .queue-panel:hover *::-webkit-scrollbar-thumb {
   background-color: var(--background-tinted-base);
-  
 }
 
 
+/* Sidebar & Queue specific scrollbar colors */
+.sidebar, .sidebar * {
+  scrollbar-color: var(--background-highlight) var(--background-elevated-base);
+}
+.sidebar::-webkit-scrollbar-track { background: var(--background-elevated-base); }
+
+.queue-panel, .queue-panel * {
+  scrollbar-color: var(--background-highlight) var(--background-elevated-base);
+}
+.queue-panel::-webkit-scrollbar-track { background: var(--background-elevated-base); }
+
 /* Responsive Design */
 .queue-open .topbar {
-  right: var(--queue-width);
+  right: calc(var(--queue-width) + var(--sidebar-gap));
 }
 
 @media (max-width: 768px) {

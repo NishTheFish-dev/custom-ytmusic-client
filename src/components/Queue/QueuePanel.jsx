@@ -20,20 +20,30 @@ const QueuePanel = ({
   onTrackRemove,
 }) => {
   return (
-    <Box className="queue-panel"
+    <Box className="queue-container"
       sx={{
         position: 'fixed',
         top: 'var(--topbar-height)',
         right: 0,
         bottom: 'calc(var(--player-height) + 6px)',
-        width: 'var(--queue-width)',
-        backgroundColor: 'var(--background-base)',
-        borderLeft: '1px solid var(--background-highlight)',
+        width: 'calc(var(--queue-width) + var(--sidebar-gap))',
         display: 'flex',
-        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        pr: 'var(--sidebar-gap)',
         zIndex: 900,
       }}
     >
+      <Box className="queue-panel"
+        sx={{
+          width: 'var(--queue-width)',
+          backgroundColor: 'var(--background-elevated-base)',
+          border: '1px solid var(--background-highlight)',
+          borderRadius: 2,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
 
       <Box sx={{ 
         pt: 3, 
@@ -149,6 +159,7 @@ const QueuePanel = ({
           </ListItem>
         ))}
       </List>
+      </Box>
     </Box>
   );
 };
