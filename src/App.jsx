@@ -6,11 +6,11 @@ import Typography from '@mui/material/Typography';
 import AuthComponent from './components/Auth/AuthComponent';
 import { authService } from './services/authService';
 import Sidebar from './components/Layout/Sidebar';
-import TopNav from './components/Layout/TopNav';
+import GlobalControls from './components/GlobalControls';
 import QueuePanel from './components/Queue/QueuePanel';
 import Playlists from './components/Playlists/Playlists';
 import PlaylistTracks from './components/Playlists/PlaylistTracks';
-import PlayerBar from './components/Player/PlayerBar';
+// (Removed PlayerBar import – now handled by GlobalControls) from './components/Player/PlayerBar';
 import { useAudio } from './context/AudioContext';
 import { youtubeApi } from './services/youtubeApi';
 import './index.css';
@@ -203,7 +203,7 @@ function App() {
                 paddingRight: showQueue ? 'var(--queue-width)' : 0,
                 overflow: 'hidden'
               }}>
-                <TopNav onHomeClick={handleHomeClick} onSearch={handleSearch} />
+                <GlobalControls onHomeClick={handleHomeClick} onSearch={handleSearch} onToggleQueue={handleToggleQueue} />
                 <div className="content" style={{ 
                   flex: 1, 
                   overflow: currentView === 'playlist' ? 'hidden' : 'auto', 
@@ -214,7 +214,7 @@ function App() {
               </div>
             </div>
 
-            <PlayerBar onToggleQueue={handleToggleQueue} />
+            
 
             <Box sx={{
               position: 'fixed',
@@ -225,7 +225,7 @@ function App() {
 
               zIndex: 900,
               backgroundColor: 'var(--background-base)',
-              borderLeft: '1px solid var(--background-highlight)',
+              borderLeft: 'none',
               overflowY: 'auto',
               visibility: showQueue ? 'visible' : 'hidden'
             }}>

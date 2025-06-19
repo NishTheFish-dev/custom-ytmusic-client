@@ -1,10 +1,177 @@
-import React from 'react';
-import { Box, IconButton, Slider, Typography, useTheme } from '@mui/material';
-import { PlayArrow, Pause, SkipPrevious, SkipNext, VolumeUp, VolumeOff, QueueMusic, Shuffle, Repeat, RepeatOne } from '@mui/icons-material';
+import React, { useState } from 'react';
+import {
+  Box,
+  IconButton,
+  TextField,
+  InputAdornment,
+  Slider,
+  Typography,
+  useTheme,
+} from '@mui/material';
+import {
+  Home as HomeIcon,
+  Search as SearchIcon,
+  PlayArrow,
+  Pause,
+  SkipPrevious,
+  SkipNext,
+  VolumeUp,
+  VolumeOff,
+  QueueMusic,
+  Shuffle,
+  Repeat,
+  RepeatOne,
+} from '@mui/icons-material';
 
-import { useAudio } from '../../context/AudioContext';
+import { useAudio } from '../context/AudioContext';
 
-const PlayerBar = ({ onToggleQueue }) => {
+/**
+ * GlobalControls consolidates the previous TopNav and PlayerBar components into a single
+ * file so their UI is rendered directly on the application "floor" (no raised nav bars).
+ *
+ * Props:
+ * - onHomeClick      : () => void
+ * - onSearch         : (query: string) => void
+ * - onToggleQueue    : () => void   (toggles the queue sidebar)
+ */
+const GlobalControls = ({ onHomeClick, onSearch, onToggleQueue }) => {
+  return (
+    <>
+      <TopControls onHomeClick={onHomeClick} onSearch={onSearch} />
+      <BottomPlayerControls onToggleQueue={onToggleQueue} />
+    </>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/*                              Top (Search) Bar                              */
+/* -------------------------------------------------------------------------- */
+const TopControls = ({ onHomeClick, onSearch }) => {
+  const [searchText, setSearchText] = useState('');
+
+  return (
+    <Box
+      className="topbar"
+      sx={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 'var(--topbar-height)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0 24px',
+        backgroundColor: 'var(--background-base)',
+        // No borders or elevation – sits flush with the app background
+        zIndex: 1100,
+        gap: 2,
+        WebkitAppRegion: 'drag',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
+      }}
+    >
+      <Box
+        sx={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            maxWidth: '600px',
+            width: '100%',
+            margin: '0 auto',
+            padding: '0 24px',
+          }}
+        >
+          <IconButton
+            onClick={onHomeClick}
+            sx={{
+              color: 'var(--text-base)',
+              '&:hover': {
+                backgroundColor: 'var(--background-highlight)',
+              },
+              marginRight: 2,
+              WebkitAppRegion: 'no-drag',
+            }}
+          >
+            <HomeIcon />
+          </IconButton>
+
+          <Box sx={{ flex: 1, maxWidth: '600px' }}>
+            <TextField
+              placeholder="Search for songs, artists, or playlists"
+              variant="outlined"
+              size="small"
+              fullWidth
+              sx={{ WebkitAppRegion: 'no-drag' }}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  onSearch(searchText);
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <IconButton
+                      onClick={() => {
+                        if (searchText.trim()) onSearch(searchText);
+                      }}
+                      edge="start"
+                      sx={{
+                        color: 'var(--text-subdued)',
+                        '&:hover': {
+                          backgroundColor: 'transparent',
+                        },
+                      }}
+                    >
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: {
+                  backgroundColor: 'var(--background-elevated-base)',
+                  borderRadius: 2,
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'transparent',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'var(--background-highlight)',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'var(--essential-bright-accent)',
+                  },
+                  '& input': {
+                    color: 'var(--text-base)',
+                    padding: '8.5px 0',
+                    '&::placeholder': {
+                      color: 'var(--text-subdued)',
+                      opacity: 1,
+                    },
+                  },
+                },
+              }}
+            />
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/*                        Bottom (Player / Transport) Bar                      */
+/* -------------------------------------------------------------------------- */
+const BottomPlayerControls = ({ onToggleQueue }) => {
   const {
     currentTrack,
     isPlaying,
@@ -22,8 +189,10 @@ const PlayerBar = ({ onToggleQueue }) => {
     toggleShuffle,
     cycleRepeat,
   } = useAudio();
+
   const [prevVolume, setPrevVolume] = React.useState(volume);
   const theme = useTheme();
+
   const parseDurationToSeconds = (dur) => {
     if (typeof dur === 'number') return dur;
     if (typeof dur !== 'string') return 0;
@@ -38,15 +207,13 @@ const PlayerBar = ({ onToggleQueue }) => {
   };
 
   const hasTrack = Boolean(currentTrack);
-  const durationSeconds = hasTrack ? (duration || parseDurationToSeconds(currentTrack?.duration)) : 0;
+  const durationSeconds = hasTrack ? duration || parseDurationToSeconds(currentTrack?.duration) : 0;
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   };
-
-  // theme already called above
 
   const handleNext = () => {
     if (queue.length) {
@@ -57,11 +224,9 @@ const PlayerBar = ({ onToggleQueue }) => {
   };
 
   const handlePrevious = () => {
-    // For simplicity, restart current track
     seek(0);
   };
 
-  
   return (
     <Box
       className="player"
@@ -70,10 +235,10 @@ const PlayerBar = ({ onToggleQueue }) => {
         bottom: 0,
         left: 0,
         right: 0,
-        height: '96px',
+        height: 'var(--player-height)',
         paddingTop: '4px',
         backgroundColor: 'var(--background-base)',
-        borderTop: '1px solid var(--background-tinted-base)',
+        // No border/elevation, sits flush
         display: 'flex',
         alignItems: 'center',
         padding: '0 16px',
@@ -134,15 +299,16 @@ const PlayerBar = ({ onToggleQueue }) => {
         )}
       </Box>
 
-
       {/* Player Controls */}
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        flex: 1,
-        maxWidth: '40%',
-      }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          flex: 1,
+          maxWidth: '40%',
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', mt: '4px' }}>
           <IconButton size="small" onClick={toggleShuffle} sx={{ color: shuffle ? theme.palette.primary.main : 'inherit' }} disabled={!hasTrack}>
             <Shuffle />
@@ -172,7 +338,7 @@ const PlayerBar = ({ onToggleQueue }) => {
         </Box>
         <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Typography variant="caption" color="text.secondary" sx={{ minWidth: '40px' }}>
-            {hasTrack ? formatTime(progress * durationSeconds / 100) : '--:--'}
+            {hasTrack ? formatTime((progress * durationSeconds) / 100) : '--:--'}
           </Typography>
           <Slider
             value={hasTrack ? progress : 0}
@@ -200,22 +366,28 @@ const PlayerBar = ({ onToggleQueue }) => {
       </Box>
 
       {/* Volume and Queue Controls */}
-      <Box sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        width: '30%',
-        gap: '16px',
-      }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          width: '30%',
+          gap: '16px',
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', width: '120px' }}>
-          <IconButton onClick={() => {
-            if (volume === 0) {
-              changeVolume(prevVolume || 50);
-            } else {
-              setPrevVolume(volume);
-              changeVolume(0);
-            }
-          }} size="small" sx={{ mr: 1 }}>
+          <IconButton
+            onClick={() => {
+              if (volume === 0) {
+                changeVolume(prevVolume || 50);
+              } else {
+                setPrevVolume(volume);
+                changeVolume(0);
+              }
+            }}
+            size="small"
+            sx={{ mr: 1 }}
+          >
             {volume === 0 ? <VolumeOff /> : <VolumeUp />}
           </IconButton>
           <Slider
@@ -240,4 +412,4 @@ const PlayerBar = ({ onToggleQueue }) => {
   );
 };
 
-export default PlayerBar;
+export default GlobalControls;

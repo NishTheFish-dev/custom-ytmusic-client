@@ -39,7 +39,7 @@ const UserProfile = ({ user, onLogout }) => {
         padding: '0 16px',
         height: 64,
         backgroundColor: 'var(--background-base)',
-        borderTop: '1px solid var(--background-highlight)',
+        borderTop: 'none',
       }}
     >
       <Box

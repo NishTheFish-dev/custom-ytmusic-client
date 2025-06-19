@@ -37,7 +37,7 @@ const QueuePanel = ({
         sx={{
           width: 'var(--queue-width)',
           backgroundColor: 'var(--background-elevated-base)',
-          border: '1px solid var(--background-highlight)',
+          border: 'none',
           borderRadius: 2,
           overflow: 'hidden',
           display: 'flex',
