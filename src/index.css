@@ -74,6 +74,88 @@ code {
   margin-right: calc(var(--queue-width) + var(--sidebar-gap));
 }
 
+/* Main app container */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--background-base);
+  color: var(--text-base);
+  overflow: hidden;
+  position: relative;
+}
+
+/* App layout - contains sidebar and main content */
+.app-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  padding-right: var(--queue-width, 0);
+  transition: padding-right 0.3s ease;
+}
+
+/* Content wrapper */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  padding: 24px;
+  background-color: var(--background-base);
+}
+
+/* Global controls wrapper */
+.global-controls-wrapper {
+  position: relative;
+  z-index: 10;
+  background-color: var(--background-base);
+}
+
+/* Ensure the playlist content takes full height */
+.playlist-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  background-color: var(--background-base);
+  border-radius: 8px;
+}
+
+/* Track list container */
+.track-list-container {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  position: relative;
+  padding-bottom: 20px;
+}
+
+/* Ensure the content area takes full height when in playlist view */
+.content > div {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 
 .app-container {
   display: flex;
@@ -92,9 +174,9 @@ code {
   padding: 24px 12px 0;
 
   overflow-y: auto;
-
-  /* Hide scrollbar until hover */
-  scrollbar-width: none; /* Firefox */
+  /* Consistent thin scrollbar */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(255,255,255,0.6) transparent;
 }
 
 .sidebar:hover {
@@ -107,29 +189,14 @@ code {
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar-thumb);
-  transition: background-color 0.2s ease;
+  background-color: rgba(255,255,255,0.6);
+  border-radius: 4px;
 }
 
 .sidebar:hover::-webkit-scrollbar-thumb {
   background-color: var(--background-tinted-base);
 }
 
-/* Queue panel scrollbar visibility */
-.queue-panel {
-  scrollbar-width: none;
-}
-.queue-panel:hover {
-  scrollbar-width: thin;
-}
-.queue-panel::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-.queue-panel:hover::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
 
 .main-content {
   flex: 1;
@@ -425,7 +492,7 @@ code {
 .sidebar, .queue-panel {
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.2) transparent;
+  scrollbar-color: rgba(255,255,255,0.6) transparent;
 }
 
 .sidebar::-webkit-scrollbar,
@@ -440,7 +507,7 @@ code {
 
 .sidebar::-webkit-scrollbar-thumb,
 .queue-panel::-webkit-scrollbar-thumb {
-  background-color: rgba(255,255,255,0.2);
+  background-color: rgba(255,255,255,0.6);
   border-radius: 4px;
 }
 
@@ -471,4 +538,36 @@ code {
   .topbar {
     left: 0;
   }
-} 
+}
+
+
+/* === Alignment Overrides for Full-Height Three-Column Layout === */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.sidebar,
+.main-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+/* === End Alignment Overrides === */

@@ -1,0 +1,8 @@
+.album-card {
+  margin: 16px;
+}
+
+.album-card:hover {
+  /* accentuate on hover without touching inline sx */
+  transform: translateY(-4px);
+}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import AlbumGrid from '../Grid/AlbumGrid';
+import './PlaylistCard.css';
 import { playlistService } from '../../services/playlistService';
 
 const Playlists = ({ onPlaylistClick, onPlayClick }) => {
@@ -91,7 +92,7 @@ const Playlists = ({ onPlaylistClick, onPlayClick }) => {
       </Box>
 
       {/* Scrollable playlists list */}
-      <Box sx={{ flex: 1, overflowY: 'auto', px: 3, pb: 3 }}>
+      <Box className="playlist-card" sx={{ flex: 1, overflowY: 'auto', px: 3, pb: 3 }}>
         {playlists.length === 0 ? (
           <Typography
             variant="body1"

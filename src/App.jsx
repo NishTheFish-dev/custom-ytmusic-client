@@ -171,23 +171,12 @@ function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <div className="app-container" style={{ 
-        position: 'relative',
-        height: '100vh',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
+      <div className="app-container">
         {!isAuthenticated ? (
           <AuthComponent onAuthSuccess={handleAuthSuccess} />
         ) : (
           <>
-            <div style={{ 
-              display: 'flex', 
-              flex: 1, 
-              overflow: 'hidden',
-              position: 'relative'
-            }}>
+            <div className="app-layout">
               <Sidebar
                 currentView={currentView}
                 setCurrentView={setCurrentView}
@@ -195,26 +184,15 @@ function App() {
                 sidebarWidth={sidebarWidth}
                 onWidthChange={setSidebarWidth}
               />
-              <div className="main-content" style={{ 
-                flex: 1, 
-                display: 'flex', 
-                flexDirection: 'column',
-                width: '100%',
-                paddingRight: showQueue ? 'var(--queue-width)' : 0,
-                overflow: 'hidden'
-              }}>
-                <GlobalControls onHomeClick={handleHomeClick} onSearch={handleSearch} onToggleQueue={handleToggleQueue} />
-                <div className="content" style={{ 
-                  flex: 1, 
-                  overflow: currentView === 'playlist' ? 'hidden' : 'auto', 
-                  padding: '24px'
-                }}>
+              <div className="main-content">
+                <div className="global-controls-wrapper">
+                  <GlobalControls onHomeClick={handleHomeClick} onSearch={handleSearch} onToggleQueue={handleToggleQueue} />
+                </div>
+                <div className="content">
                   {renderContent()}
                 </div>
               </div>
             </div>
-
-            
 
             <Box sx={{
               position: 'fixed',
@@ -222,7 +200,6 @@ function App() {
               right: showQueue ? 0 : 'var(--queue-width, 0px)',
               bottom: 'var(--player-height, 0px)',
               width: 'var(--queue-width, 0px)',
-
               zIndex: 900,
               backgroundColor: 'var(--background-base)',
               borderLeft: 'none',
@@ -233,9 +210,9 @@ function App() {
                 <QueuePanel
                   queue={queue}
                   currentTrack={currentTrack}
-                  onTrackClick={(track) => {}}
-                  onTrackPlay={(track) => {}}
-                  onTrackRemove={(track) => {}}
+                  onTrackClick={() => {}}
+                  onTrackPlay={() => {}}
+                  onTrackRemove={() => {}}
                 />
               )}
             </Box>

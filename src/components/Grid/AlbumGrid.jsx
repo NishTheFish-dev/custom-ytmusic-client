@@ -1,35 +1,25 @@
 import React from 'react';
 import { Box, Typography, Card, CardContent, CardMedia } from '@mui/material';
+import './AlbumCard.css';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
   return (
     <Box
+      className="playlist-card"
       sx={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-        gap: '24px',
-        padding: '16px 24px',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+        gap: '16px',
+        padding: '8px 16px',
         overflowY: 'auto',
         height: '100%',
-        '&::-webkit-scrollbar': {
-          width: '8px',
-        },
-        '&::-webkit-scrollbar-track': {
-          background: 'var(--background-base)',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          background: 'var(--background-tinted-base)',
-          borderRadius: '4px',
-          '&:hover': {
-            background: 'var(--background-tinted-highlight)',
-          },
-        },
       }}
     >
       {items.map((item) => (
         <Card
           key={item.id}
+          className="album-card"
           sx={{
             backgroundColor: 'var(--background-elevated-base, #181818)',
             borderRadius: '8px',
@@ -47,7 +37,7 @@ const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
             padding: '16px',
             width: '100%',
             height: '100%',
-            minHeight: '260px',
+            minHeight: '220px',
             boxSizing: 'border-box',
             boxShadow: '0 8px 24px rgba(0,0,0,.5)',
           }}

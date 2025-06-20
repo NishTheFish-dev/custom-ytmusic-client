@@ -286,51 +286,55 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
 
   // Main layout container
   return (
-    <>
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
-        {/* Playlist header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 4, py: 4, position: 'sticky', top: 0, zIndex: 2, background: 'var(--background, #181818)' }}>
-          <img
-            src={playlist?.thumbnail}
-            alt={playlist?.title}
-            style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 8, marginRight: 32 }}
-          />
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700 }}>
-              {playlist?.title}
-            </Typography>
-            <Typography variant="subtitle1" sx={{ color: 'var(--text-subdued)' }}>
-              {playlist?.description}
-            </Typography>
-            <Typography sx={{ color: 'var(--text-subdued)', mt: 1 }}>
-              {playlist?.itemCount} songs
-            </Typography>
-          </Box>
-        </Box>
-        {/* Track List (react-window) */}
-        <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
-            <AutoSizer>
-              {({ height, width }) => (
-                <List
-                  height={height}
-                  itemCount={tracks.length}
-                  itemSize={TRACK_ROW_HEIGHT}
-                  width={width}
-                  onItemsRendered={handleItemsRendered}
-                  ref={listRef}
-                >
-                  {Row}
-                </List>
-              )}
-            </AutoSizer>
-            {/* {loading && !initialLoad && Array.from({ length: 5 }).map((_, i) => (
-              <Box key={i}>{SkeletonRow()}</Box>
-            ))} */}
-          </Box>
+    <div className="playlist-content">
+      {/* Playlist header */}
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        px: 4, 
+        py: 4, 
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 2, 
+        background: 'var(--background-base)',
+        borderBottom: '1px solid var(--background-tinted-base)'
+      }}>
+        <img
+          src={playlist?.thumbnail}
+          alt={playlist?.title}
+          style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 8, marginRight: 32 }}
+        />
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>
+            {playlist?.title}
+          </Typography>
+          <Typography variant="subtitle1" sx={{ color: 'var(--text-subdued)' }}>
+            {playlist?.description}
+          </Typography>
+          <Typography sx={{ color: 'var(--text-subdued)', mt: 1 }}>
+            {playlist?.itemCount} songs
+          </Typography>
         </Box>
       </Box>
-    </>
+      
+      {/* Track List (react-window) */}
+      <div className="track-list-container">
+        <AutoSizer>
+          {({ height, width }) => (
+            <List
+              height={height}
+              itemCount={tracks.length}
+              itemSize={TRACK_ROW_HEIGHT}
+              width={width}
+              onItemsRendered={handleItemsRendered}
+              ref={listRef}
+            >
+              {Row}
+            </List>
+          )}
+        </AutoSizer>
+      </div>
+    </div>
   );
 };
 

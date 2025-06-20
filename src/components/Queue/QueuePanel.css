@@ -1,0 +1,20 @@
+.queue-panel {
+  scrollbar-width: none; /* Firefox */
+  margin: 16px;
+}
+.queue-panel:hover {
+  scrollbar-width: thin;
+}
+.queue-panel::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.queue-panel:hover::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.queue-panel::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}

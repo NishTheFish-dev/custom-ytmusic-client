@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import './QueuePanel.css';
 
 const QueuePanel = ({
   queue,
