@@ -16,7 +16,6 @@ An unofficial custom desktop client for YouTube Music built with React.js and El
 - Discord Rich Presence – show track title, artist, progress in status
 - Download / cache tracks for offline listening
 - Equalizer & audio effects panel
-- Light theme & theme switcher
 - Lyrics fetcher (YT captions / external services)
 - Settings window with hot-key customisation
 
