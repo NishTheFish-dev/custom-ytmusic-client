@@ -180,18 +180,21 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
         thumbnail: track.thumbnail,
         duration: track.duration,
       });
-      // Add remaining tracks as queue starting from next index
-      // Build rest of playlist excluding selected track
-    let rest = tracks.filter(t => t.id !== track.id);
-    // If shuffle mode already ON, shuffle the rest now
-    if (shuffle) {
-      rest = [...rest];
-      for (let i = rest.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [rest[i], rest[j]] = [rest[j], rest[i]];
+      // Build queue depending on shuffle state
+      let rest;
+      if (shuffle) {
+        // Shuffle ON: keep existing behaviour – queue is all other tracks randomly ordered
+        rest = tracks.filter(t => t.id !== track.id);
+        rest = [...rest];
+        for (let i = rest.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [rest[i], rest[j]] = [rest[j], rest[i]];
+        }
+      } else {
+        // Shuffle OFF: queue should start from the song immediately after the picked one
+        rest = tracks.slice(index + 1);
       }
-    }
-    setQueue(rest);
+      setQueue(rest);
     };
 
     return (
