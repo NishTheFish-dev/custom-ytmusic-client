@@ -40,7 +40,7 @@ class LibraryService {
       this.saveLibrary();
       return true;
     } catch (error) {
-      console.error('Error adding to library:', error);
+
       return false;
     }
   }
@@ -64,7 +64,7 @@ class LibraryService {
       this.saveLibrary();
       return true;
     } catch (error) {
-      console.error('Error removing from library:', error);
+
       return false;
     }
   }
@@ -77,7 +77,7 @@ class LibraryService {
       ].slice(0, 50); // Keep only last 50 items
       this.saveLibrary();
     } catch (error) {
-      console.error('Error adding to recently played:', error);
+
     }
   }
 
@@ -110,7 +110,7 @@ class LibraryService {
       this.saveLibrary();
       return true;
     } catch (error) {
-      console.error('Error syncing with YouTube:', error);
+
       return false;
     }
   }

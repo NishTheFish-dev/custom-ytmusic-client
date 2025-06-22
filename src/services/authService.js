@@ -12,7 +12,7 @@ class AuthService {
         this.isAuthenticated = true;
       }
     } catch (error) {
-      console.error('Error initializing auth service:', error);
+
       throw error;
     }
   }
@@ -24,7 +24,7 @@ class AuthService {
       this.isAuthenticated = true;
       return user;
     } catch (error) {
-      console.error('Error during login:', error);
+
       throw error;
     }
   }
@@ -36,7 +36,7 @@ class AuthService {
       this.isAuthenticated = false;
       return true;
     } catch (error) {
-      console.error('Error during logout:', error);
+
       return false;
     }
   }
@@ -47,7 +47,7 @@ class AuthService {
       this.user = user;
       return true;
     } catch (error) {
-      console.error('Error refreshing access token:', error);
+
       this.logout();
       return false;
     }
@@ -57,7 +57,7 @@ class AuthService {
     try {
       return await window.electronAPI.auth.getUserInfo();
     } catch (error) {
-      console.error('Error getting user info:', error);
+
       throw error;
     }
   }

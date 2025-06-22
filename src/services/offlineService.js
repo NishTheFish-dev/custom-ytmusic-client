@@ -20,7 +20,7 @@ class OfflineService {
       this.store.set('isOfflineMode', true);
       return true;
     } catch (error) {
-      console.error('Error enabling offline mode:', error);
+
       return false;
     }
   }
@@ -31,7 +31,7 @@ class OfflineService {
       this.store.set('isOfflineMode', false);
       return true;
     } catch (error) {
-      console.error('Error disabling offline mode:', error);
+
       return false;
     }
   }
@@ -51,7 +51,7 @@ class OfflineService {
       this.saveOfflineData();
       return offlineTrack;
     } catch (error) {
-      console.error('Error downloading track:', error);
+
       throw error;
     }
   }
@@ -80,7 +80,7 @@ class OfflineService {
       this.saveOfflineData();
       return offlinePlaylist;
     } catch (error) {
-      console.error('Error downloading playlist:', error);
+
       throw error;
     }
   }
@@ -109,7 +109,7 @@ class OfflineService {
       this.saveOfflineData();
       return offlineAlbum;
     } catch (error) {
-      console.error('Error downloading album:', error);
+
       throw error;
     }
   }
@@ -120,7 +120,7 @@ class OfflineService {
       this.saveOfflineData();
       return true;
     } catch (error) {
-      console.error('Error removing offline track:', error);
+
       return false;
     }
   }
@@ -131,7 +131,7 @@ class OfflineService {
       this.saveOfflineData();
       return true;
     } catch (error) {
-      console.error('Error removing offline playlist:', error);
+
       return false;
     }
   }
@@ -142,7 +142,7 @@ class OfflineService {
       this.saveOfflineData();
       return true;
     } catch (error) {
-      console.error('Error removing offline album:', error);
+
       return false;
     }
   }

@@ -8,7 +8,7 @@ class PreferencesService {
     try {
       this.preferences = await window.electronAPI.preferences.get();
     } catch (error) {
-      console.error('Error initializing preferences:', error);
+
       this.preferences = {
         windowBounds: {
           width: 1600,
@@ -32,7 +32,7 @@ class PreferencesService {
       this.preferences = preferences;
       return true;
     } catch (error) {
-      console.error('Error saving preferences:', error);
+
       return false;
     }
   }

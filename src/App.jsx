@@ -58,7 +58,7 @@ function App() {
       } else {
         authService.getUserInfo()
           .then(info => setGoogleUser(info?.name || info?.displayName || info?.given_name || info?.email || null))
-          .catch(err => console.error('Failed fetching user info', err));
+          .catch(() => {});
       }
     }
   }, [isAuthenticated, googleUser]);
@@ -69,7 +69,7 @@ function App() {
         const authStatus = await youtubeApi.isAuthenticated();
         setIsAuthenticated(authStatus);
       } catch (error) {
-        console.error('Error checking authentication:', error);
+
       } finally {
         setIsLoading(false);
       }
@@ -84,7 +84,7 @@ function App() {
       const info = await authService.getUserInfo();
       setGoogleUser(info?.name || info?.displayName || null);
     } catch (e) {
-      console.error('Failed fetching user info', e);
+
     }
   };
 

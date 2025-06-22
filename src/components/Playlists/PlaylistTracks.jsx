@@ -79,7 +79,7 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
       // Mark initial load as done after first batch
       if (initialLoadInProgressRef.current) initialLoadInProgressRef.current = false;
     } catch (err) {
-      console.error('Error loading tracks:', err);
+
       if (requestIdRef.current === thisRequestId) {
         setHasMore(false);
       }
@@ -170,7 +170,7 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
     // store entire playlist for global shuffle reference
     setFullPlaylist(tracks);
       if (!track.id) {
-        console.error('Track missing video ID:', track);
+
         return;
       }
       playTrack({

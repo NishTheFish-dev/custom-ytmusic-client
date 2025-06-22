@@ -13,7 +13,7 @@ class PlaylistService {
         this.playlists = storedPlaylists;
       }
     } catch (error) {
-      console.error('Error initializing playlist service:', error);
+
     }
   }
 
@@ -24,7 +24,7 @@ class PlaylistService {
       await this.savePlaylists();
       return playlist;
     } catch (error) {
-      console.error('Error creating playlist:', error);
+
       throw error;
     }
   }
@@ -36,7 +36,7 @@ class PlaylistService {
       await this.savePlaylists();
       return true;
     } catch (error) {
-      console.error('Error deleting playlist:', error);
+
       return false;
     }
   }
@@ -52,7 +52,7 @@ class PlaylistService {
       }
       return true;
     } catch (error) {
-      console.error('Error adding to playlist:', error);
+
       return false;
     }
   }
@@ -67,7 +67,7 @@ class PlaylistService {
       }
       return true;
     } catch (error) {
-      console.error('Error removing from playlist:', error);
+
       return false;
     }
   }
@@ -82,7 +82,7 @@ class PlaylistService {
       }
       return true;
     } catch (error) {
-      console.error('Error updating playlist:', error);
+
       return false;
     }
   }
@@ -97,7 +97,7 @@ class PlaylistService {
       }
       return true;
     } catch (error) {
-      console.error('Error reordering playlist:', error);
+
       return false;
     }
   }
@@ -114,7 +114,7 @@ class PlaylistService {
     try {
       await window.electronAPI.playlist.savePlaylists(this.playlists);
     } catch (error) {
-      console.error('Error saving playlists:', error);
+
     }
   }
 
@@ -125,7 +125,7 @@ class PlaylistService {
       await this.savePlaylists();
       return true;
     } catch (error) {
-      console.error('Error syncing playlists with YouTube:', error);
+
       return false;
     }
   }
@@ -144,7 +144,7 @@ class PlaylistService {
         channelTitle: playlist.snippet.channelTitle,
       }));
     } catch (error) {
-      console.error('Error fetching playlists:', error);
+
       throw error;
     }
   }
@@ -162,7 +162,7 @@ class PlaylistService {
         duration: item.contentDetails.duration,
       }));
     } catch (error) {
-      console.error('Error fetching playlist items:', error);
+
       throw error;
     }
   }
@@ -215,7 +215,7 @@ class PlaylistService {
         : [];
       return { items, nextPageToken: response.nextPageToken };
     } catch (error) {
-      console.error('Error fetching playlist items page:', error);
+
       return { items: [], nextPageToken: null };
     }
   }

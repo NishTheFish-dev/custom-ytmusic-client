@@ -17,7 +17,7 @@ class SearchService {
       this.addToSearchHistory(query);
       return this.searchResults;
     } catch (error) {
-      console.error('Error searching:', error);
+
       throw error;
     }
   }
@@ -45,7 +45,7 @@ class SearchService {
       const response = await axios.get(`https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&q=${encodeURIComponent(query)}`);
       return response.data[1];
     } catch (error) {
-      console.error('Error getting suggestions:', error);
+
       return [];
     }
   }

@@ -34,7 +34,7 @@ const Sidebar = ({ currentView, setCurrentView, onPlaylistClick }) => {
       setPlaylists(data);
     } catch (err) {
       setError('Failed to load playlists');
-      console.error('Error loading playlists:', err);
+
     } finally {
       setLoading(false);
     }
