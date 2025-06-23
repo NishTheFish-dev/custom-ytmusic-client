@@ -1,57 +1,39 @@
 :root {
-  --text-base: #fff;
+  /* Color palette */
+  --text-base: #ffffff;
   --text-subdued: #a7a7a7;
   --background-base: #121212;
-  --background-highlight: #1a1a1a;
-  --background-press: #000;
-  --background-elevated-base: #242424;
-  --background-tinted-base: hsla(0,0%,100%,.07);
-  --background-tinted-highlight: hsla(0,0%,100%,.1);
-  --essential-base: #fff;
-  --essential-subdued: #727272;
-  --essential-bright-accent: #CD201F;
-  --essential-negative: #e91429;
-  --essential-warning: #ffa42b;
-  --essential-positive: #1ed760;
-  --essential-announcement: #0d72ea;
-  --decorative-base: #fff;
-  --decorative-subdued: #292929;
-  --sidebar-width: 400px;
-  --queue-width: 400px;
-  --topbar-height: 64px;
-  --player-height: 90px;
+  --background-elevated-base: #181818;
+  --background-tinted-base: rgba(255, 255, 255, 0.07);
+  --essential-accent: #cd201f;
+
+  /* Layout metrics */
+  --sidebar-width: 400px; /* not used in new design but kept for continuity */
+  --queue-width: 400px;   /* width of right card when visible */
+  --topbar-height: 64px;  /* GlobalControls assumed height */
+  --player-height: 90px;  /* Height of bottom player bar */
   --scrollbar-size: 8px;
-  --scrollbar-thumb: #000;
-  --sidebar-gap: 8px;
 }
 
+/* CSS Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body,
+#root {
   height: 100%;
-  margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  overflow: hidden;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   background-color: var(--background-base);
   color: var(--text-base);
-  overflow: hidden;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
+/* General scrollbar styling */
 ::-webkit-scrollbar {
   width: var(--scrollbar-size);
 }
@@ -65,509 +47,46 @@ code {
   border-radius: 6px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--background-tinted-highlight);
-}
-
-/* Layout */
-.queue-open .content {
-  margin-right: calc(var(--queue-width) + var(--sidebar-gap));
-}
-
-/* Main app container */
+/* Wrapper that contains everything except bottom player */
 .app-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  width: 100vw;
-  background-color: var(--background-base);
-  color: var(--text-base);
-  overflow: hidden;
-  position: relative;
-}
-
-/* App layout - contains sidebar and main content */
-.app-layout {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-}
-
-/* Main content area */
-.main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-  padding-right: var(--queue-width, 0);
-  transition: padding-right 0.3s ease;
-}
-
-/* Content wrapper */
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-  position: relative;
-  padding: 24px;
-  background-color: var(--background-base);
-}
-
-/* Global controls wrapper */
-.global-controls-wrapper {
-  position: relative;
-  z-index: 10;
-  background-color: var(--background-base);
-}
-
-/* Ensure the playlist content takes full height */
-.playlist-content {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  position: relative;
-  background-color: var(--background-base);
-  border-radius: 8px;
-}
-
-/* Track list container */
-.track-list-container {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-  position: relative;
-  padding-bottom: 20px;
-}
-
-/* Ensure the content area takes full height when in playlist view */
-.content > div {
   height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-
-.app-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* full viewport height */
-  background-color: var(--background-base);
-  color: var(--text-base);
-  overflow: hidden; /* prevent double scrollbars */
-}
-
-.sidebar {
-  width: var(--sidebar-width);
-  scrollbar-gutter: stable; /* reserve scrollbar space */
-  background-color: var(--background-base);
-  /* border no longer needed inside card */
-  padding: 24px 12px 0;
-
-  overflow-y: auto;
-  /* Consistent thin scrollbar */
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: rgba(255,255,255,0.6) transparent;
-}
-
-.sidebar:hover {
-  scrollbar-width: thin;
-}
-
-.sidebar::-webkit-scrollbar {
-  width: var(--scrollbar-size);
-  height: var(--scrollbar-size);
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background-color: rgba(255,255,255,0.6);
-  border-radius: 4px;
-}
-
-.sidebar:hover::-webkit-scrollbar-thumb {
-  background-color: var(--background-tinted-base);
-}
-
-
-.main-content {
-  flex: 1;
-  height: calc(100vh - var(--topbar-height) - var(--player-height));
-  display: flex;
-  flex-direction: column;
+  width: 100%;
   overflow: hidden;
-  margin-top: var(--topbar-height);
-
 }
 
-.content {
-  flex: 1;
-  overflow: auto;
-  padding: 12px;
-  /* ensure content doesn't hide under player on scroll */
-  scroll-padding-bottom: calc(var(--player-height) + 6px);
-  padding-bottom: 0;
-
-  /* Card styling */
-  background-color: var(--background-base);
-  border: 1px solid var(--background-tinted-base);
-  border-radius: 8px;
-  margin: var(--sidebar-gap) var(--sidebar-gap) 0 var(--sidebar-gap);
-  box-sizing: border-box;
-}
-
-.topbar {
+/* GlobalControls wrapper fixed at top */
+.global-controls-wrapper {
   position: fixed;
   top: 0;
-  left: calc(var(--sidebar-width) + var(--sidebar-gap));
-  right: 0;
-  height: var(--topbar-height);
-  background-color: var(--background-base);
-  border-bottom: none;
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  z-index: 100;
-}
-
-.player {
-  position: fixed;
-  bottom: 0;
   left: 0;
   right: 0;
-  height: var(--player-height);
-  background: var(--background-base);
-  border-top: none;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* Navigation / selection highlights */
-.MuiListItem-root.Mui-selected {
-  color: var(--text-base) !important;
-  background-color: var(--background-tinted-base) !important;
-  border-left: 4px solid var(--essential-bright-accent);
-}
-
-/* Material-UI Overrides */
-.MuiDrawer-paper {
-  background-color: var(--background-base) !important;
-  border-right: none !important;
-  width: var(--sidebar-width) !important;
-}
-
-.MuiAppBar-root {
-  background-color: var(--background-base) !important;
-  border-bottom: none !important;
-}
-
-.MuiListItem-root {
-  color: var(--text-subdued) !important;
-  transition: color 0.2s ease-in-out !important;
-  border-radius: 4px !important;
-  margin: 4px 0 !important;
-  padding: 8px 16px !important;
-}
-
-.MuiListItem-root:hover {
-  color: var(--text-base) !important;
-  background-color: var(--background-tinted-base) !important;
-}
-
-.MuiListItemIcon-root {
-  color: inherit !important;
-  min-width: 32px !important;
-}
-
-.MuiTypography-root {
-  color: var(--text-base);
-}
-
-.MuiTypography-body2 {
-  color: var(--text-subdued);
-}
-
-/* Cards and Content */
-.card {
+  height: var(--topbar-height);
+  z-index: 100;
   background-color: var(--background-elevated-base);
-  border-radius: 8px;
-  padding: 16px;
-  transition: background-color 0.2s ease-in-out;
-  cursor: pointer;
 }
 
-.card:hover {
-  background-color: var(--background-tinted-base);
-}
-
-.track-card {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.track-card:hover {
-  background-color: var(--background-tinted-base);
-}
-
-.track-info {
-  margin-left: 12px;
+/* Space between top and bottom reserved for three-column layout */
+.app-container > .MuiBox-root:nth-of-type(2) {
+  /* This selector targets the Box that wraps MainLayout in App.jsx */
   flex: 1;
+  min-height: 0;
+  margin-top: var(--topbar-height);
+  margin-bottom: var(--player-height);
 }
 
-.track-title {
-  color: var(--text-base);
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-.track-artist {
-  color: var(--text-subdued);
-  font-size: 0.875rem;
-}
-
-.track-thumbnail {
-  width: 60px;
-  height: 60px;
-  border-radius: 4px;
-  object-fit: cover;
-}
-
-/* Buttons and Controls */
-.button {
-  background-color: var(--essential-bright-accent);
-  color: var(--background-base);
-  border: none;
-  border-radius: 20px;
-  padding: 8px 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.2s ease-in-out;
-}
-
-.button:hover {
-  transform: scale(1.04);
-}
-
-.control-button {
-  color: var(--text-subdued);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  transition: all 0.2s ease-in-out;
-}
-
-.control-button:hover {
-  color: var(--text-base);
-  background-color: var(--background-tinted-base);
-}
-
-.play-button {
-  color: var(--text-base);
-  background-color: var(--essential-bright-accent);
-  width: 32px;
-  height: 32px;
-}
-
-.play-button:hover {
-  transform: scale(1.04);
-  background-color: var(--essential-bright-accent);
-}
-
-/* Input Fields */
-.input {
-  background-color: var(--background-tinted-base);
-  border: none;
-  border-radius: 4px;
-  color: var(--text-base);
-  padding: 8px 12px;
-  width: 100%;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.input:focus {
-  outline: none;
-  background-color: var(--background-tinted-highlight);
-}
-
-/* Search Bar */
-.search-bar {
-  background-color: var(--background-tinted-base);
-  border-radius: 20px;
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 300px;
-}
-
-.search-bar input {
-  background: none;
-  border: none;
-  color: var(--text-base);
-  width: 100%;
-}
-
-.search-bar input:focus {
-  outline: none;
-}
-
-/* Grid Layout */
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 24px;
-  padding: 24px;
-}
-
-/* Hover Scrollbar Rules - refined */
-.sidebar,
-.sidebar * {
-  scrollbar-width: thin; /* always show */
-}
-
-.sidebar *::-webkit-scrollbar {
-  width: var(--scrollbar-size);
-  height: var(--scrollbar-size);
-}
-
-.sidebar *::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar-thumb);
-  transition: background-color 0.2s ease;
-}
-.sidebar:hover *::-webkit-scrollbar-thumb {
-  background-color: var(--background-tinted-base);
-}
-
-
-.queue-panel {
-  scrollbar-gutter: stable; /* reserve scrollbar space */
-}
-
-.queue-panel,
-.queue-panel * {
-  scrollbar-width: thin; /* always show */
-}
-
-.queue-panel *::-webkit-scrollbar {
-  width: var(--scrollbar-size);
-  height: var(--scrollbar-size);
-}
-
-.queue-panel *::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar-thumb);
-  transition: background-color 0.2s ease;
-}
-.queue-panel:hover *::-webkit-scrollbar-thumb {
-  background-color: var(--background-tinted-base);
-}
-
-
-/* Sidebar & Queue specific scrollbar colors */
-.sidebar, .sidebar * {
-  scrollbar-color: var(--background-highlight) var(--background-elevated-base);
-}
-.sidebar::-webkit-scrollbar-track { background: var(--background-elevated-base); }
-
-.queue-panel, .queue-panel * {
-  scrollbar-color: var(--background-highlight) var(--background-elevated-base);
-}
-.queue-panel::-webkit-scrollbar-track { background: var(--background-elevated-base); }
-
-/* Scrollbar standardisation for sidebar and queue */
-.sidebar, .queue-panel {
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.6) transparent;
-}
-
-.sidebar::-webkit-scrollbar,
-.queue-panel::-webkit-scrollbar {
-  width: 8px;
-}
-
-.sidebar::-webkit-scrollbar-track,
-.queue-panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar::-webkit-scrollbar-thumb,
-.queue-panel::-webkit-scrollbar-thumb {
-  background-color: rgba(255,255,255,0.6);
-  border-radius: 4px;
-}
-
-/* Inner padding */
-.sidebar .inner,
-.queue-panel .inner {
-  padding: 12px;
-}
-
-/* Responsive Design */
-.queue-open .topbar {
-  right: calc(var(--queue-width) + var(--sidebar-gap));
-}
-
-@media (max-width: 768px) {
-  :root {
-    --sidebar-width: 0px;
-  }
-  
-  .sidebar {
-    display: none;
-  }
-  
-  .main-content {
-    margin-left: 0;
-  }
-  
-  .topbar {
-    left: 0;
-  }
-}
-
-
-/* === Alignment Overrides for Full-Height Three-Column Layout === */
-.app-layout {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
+/* Three-column layout boxes inherit flex from MainLayout */
+/* Card wrapper style */
+.playlist-card,
+.content-card,
+.queue-card {
+  background-color: var(--background-elevated-base);
+  border-radius: 12px;
   overflow: hidden;
 }
 
-.sidebar,
-.main-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  overflow-y: auto;
-  margin: 0;
-  padding: 0;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.2) transparent;
+/* Optional hover effect */
+.playlist-card:hover {
+  background-color: inherit;
 }
-
-.sidebar::-webkit-scrollbar {
-  width: 8px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-/* === End Alignment Overrides === */

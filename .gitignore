@@ -1,5 +1,5 @@
 node_modules
-.bak
+*.bak
 .env
 .env.local
 .env.*.local

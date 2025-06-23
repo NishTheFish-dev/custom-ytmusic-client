@@ -1,26 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+
+/* Internal imports */
 import AuthComponent from './components/Auth/AuthComponent';
-import { authService } from './services/authService';
-import Sidebar from './components/Layout/Sidebar';
 import GlobalControls from './components/GlobalControls';
-import QueuePanel from './components/Queue/QueuePanel';
+import PlaylistCard from './components/Layout/PlaylistCard';
+import ContentCard from './components/Layout/ContentCard';
+import QueueCard from './components/Layout/QueueCard';
+import MainLayout from './components/Layout/MainLayout';
 import Playlists from './components/Playlists/Playlists';
 import PlaylistTracks from './components/Playlists/PlaylistTracks';
-// (Removed PlayerBar import – now handled by GlobalControls) from './components/Player/PlayerBar';
-import { useAudio } from './context/AudioContext';
-import { youtubeApi } from './services/youtubeApi';
-import './index.css';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import SearchResults from './components/Search/SearchResults';
+import { authService } from './services/authService';
+import { youtubeApi } from './services/youtubeApi';
 import { searchService } from './services/searchService';
+import { useAudio } from './context/AudioContext';
 
+import './index.css';
+
+/* Theme */
 const darkTheme = createTheme({
   typography: {
-    fontFamily: ['Inter', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'].join(','),
+    fontFamily: ['Inter', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'].join(',')
   },
   palette: {
     mode: 'dark',
@@ -29,71 +33,72 @@ const darkTheme = createTheme({
     },
     background: {
       default: '#121212',
-      paper: '#181818',
-    },
-  },
+      paper: '#181818'
+    }
+  }
 });
 
 function App() {
+  /* Context */
   const { currentTrack, queue } = useAudio();
 
+  /* State */
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentView, setCurrentView] = useState('home');
-  // currentTrack handled by AudioContext
-  const [showQueue, setShowQueue] = useState(true);
-  // queue handled by AudioContext
-  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
-  const [sidebarWidth, setSidebarWidth] = useState(240);
+  const [googleUser, setGoogleUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentView, setCurrentView] = useState('home');
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [showQueue, setShowQueue] = useState(true);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [googleUser, setGoogleUser] = useState(null);
 
-  // Ensure username is loaded when app initializes and user already authenticated
+  /* Effects */
+  useEffect(() => {
+    const initialise = async () => {
+      try {
+        const authStatus = await youtubeApi.isAuthenticated();
+        setIsAuthenticated(authStatus);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    initialise();
+  }, []);
+
+  /* Fetch username when already authenticated */
   useEffect(() => {
     if (isAuthenticated && !googleUser) {
       const stored = authService.getUser();
       if (stored) {
-        setGoogleUser(stored.name || stored.displayName || stored.given_name || stored.email || null);
+        setGoogleUser(
+          stored.name || stored.displayName || stored.given_name || stored.email || null
+        );
       } else {
-        authService.getUserInfo()
-          .then(info => setGoogleUser(info?.name || info?.displayName || info?.given_name || info?.email || null))
+        authService
+          .getUserInfo()
+          .then(info =>
+            setGoogleUser(info?.name || info?.displayName || info?.given_name || info?.email || null)
+          )
           .catch(() => {});
       }
     }
   }, [isAuthenticated, googleUser]);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const authStatus = await youtubeApi.isAuthenticated();
-        setIsAuthenticated(authStatus);
-      } catch (error) {
-
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
+  /* Handlers */
   const handleAuthSuccess = async () => {
     setIsAuthenticated(true);
     try {
       const info = await authService.getUserInfo();
       setGoogleUser(info?.name || info?.displayName || null);
-    } catch (e) {
-
-    }
+    } catch (_) {}
   };
 
-  const handleSidebarPlaylistClick = (playlist) => {
+  const handleSidebarPlaylistClick = playlist => {
     setCurrentView('playlist');
     setSelectedPlaylist(playlist);
   };
 
-  const handleSearch = async (query) => {
+  const handleSearch = async query => {
     setSearchQuery(query);
     if (!query || query.trim().length === 0) {
       setCurrentView('home');
@@ -113,13 +118,16 @@ function App() {
     setSelectedPlaylist(null);
   };
 
-  const renderContent = () => {
+  const handleToggleQueue = () => setShowQueue(prev => !prev);
+
+  /* Render helpers */
+  const renderCenterContent = () => {
     switch (currentView) {
       case 'home':
         return (
           <Box sx={{ p: 6 }}>
             <Typography variant="h4" sx={{ fontWeight: 700 }}>
-              {`Welcome${googleUser ? ", " + googleUser : ""}`}
+              {`Welcome${googleUser ? ', ' + googleUser : ''}`}
             </Typography>
           </Box>
         );
@@ -129,22 +137,14 @@ function App() {
         return <Playlists onPlaylistClick={handleSidebarPlaylistClick} />;
       case 'playlist':
         return selectedPlaylist ? (
-          <PlaylistTracks
-            playlist={selectedPlaylist}
-            isQueueOpen={showQueue}
-          />
+          <PlaylistTracks playlist={selectedPlaylist} isQueueOpen={showQueue} />
         ) : null;
       default:
-        return (
-          <Box sx={{ p: 6 }}>
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              {`Welcome${googleUser ? ", " + googleUser : ""}`}
-            </Typography>
-          </Box>
-        );
+        return null;
     }
   };
 
+  /* Loading screen */
   if (isLoading) {
     return (
       <ThemeProvider theme={darkTheme}>
@@ -155,7 +155,7 @@ function App() {
             justifyContent: 'center',
             alignItems: 'center',
             height: '100vh',
-            backgroundColor: '#121212',
+            backgroundColor: '#121212'
           }}
         >
           <Typography variant="h6" sx={{ color: '#fff' }}>
@@ -166,59 +166,45 @@ function App() {
     );
   }
 
-  const handleToggleQueue = () => setShowQueue(prev => !prev);
-
+  /* Main App UI */
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <div className="app-container">
-        {!isAuthenticated ? (
-          <AuthComponent onAuthSuccess={handleAuthSuccess} />
-        ) : (
-          <>
-            <div className="app-layout">
-              <Sidebar
-                currentView={currentView}
-                setCurrentView={setCurrentView}
-                onPlaylistClick={handleSidebarPlaylistClick}
-                sidebarWidth={sidebarWidth}
-                onWidthChange={setSidebarWidth}
-              />
-              <div className="main-content">
-                <div className="global-controls-wrapper">
-                  <GlobalControls onHomeClick={handleHomeClick} onSearch={handleSearch} onToggleQueue={handleToggleQueue} />
-                </div>
-                <div className="content">
-                  {renderContent()}
-                </div>
-              </div>
-            </div>
+      {!isAuthenticated ? (
+        <AuthComponent onAuthSuccess={handleAuthSuccess} />
+      ) : (
+        <Box className="app-container">
+          {/* Top bar */}
+          <Box className="global-controls-wrapper">
+            <GlobalControls
+              onHomeClick={handleHomeClick}
+              onSearch={handleSearch}
+              onToggleQueue={handleToggleQueue}
+            />
+          </Box>
 
-            <Box sx={{
-              position: 'fixed',
-              top: 'var(--topbar-height)',
-              right: showQueue ? 0 : 'var(--queue-width, 0px)',
-              bottom: 'var(--player-height, 0px)',
-              width: 'var(--queue-width, 0px)',
-              zIndex: 900,
-              backgroundColor: 'var(--background-base)',
-              borderLeft: 'none',
-              overflowY: 'auto',
-              visibility: showQueue ? 'visible' : 'hidden'
-            }}>
-              {showQueue && (
-                <QueuePanel
-                  queue={queue}
-                  currentTrack={currentTrack}
-                  onTrackClick={() => {}}
-                  onTrackPlay={() => {}}
-                  onTrackRemove={() => {}}
-                />
-              )}
-            </Box>
-          </>
-        )}
-      </div>
+          {/* Three-column layout between top and bottom */}
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 0,
+              overflow: 'hidden',
+              mt: 'var(--topbar-height)', // ensure aligns when GlobalControls is fixed; adjust if not fixed
+              mb: 'var(--player-height)'
+            }}
+          >
+            <MainLayout
+              left={<PlaylistCard onPlaylistSelect={handleSidebarPlaylistClick} />}
+              center={<ContentCard>{renderCenterContent()}</ContentCard>}
+              right={
+                showQueue ? <QueueCard queue={queue} currentTrack={currentTrack} /> : null
+              }
+            />
+          </Box>
+        </Box>
+      )}
     </ThemeProvider>
   );
 }

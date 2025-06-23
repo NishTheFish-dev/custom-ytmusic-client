@@ -1,20 +1,21 @@
+.queue-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .queue-panel {
-  scrollbar-width: none; /* Firefox */
-  margin: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
 }
-.queue-panel:hover {
-  scrollbar-width: thin;
-}
+
 .queue-panel::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-.queue-panel:hover::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: var(--scrollbar-size);
 }
 
 .queue-panel::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+  background: var(--background-tinted-base);
+  border-radius: 6px;
 }

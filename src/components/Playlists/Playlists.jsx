@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import { Box, Typography, CircularProgress, Divider } from '@mui/material';
 import AlbumGrid from '../Grid/AlbumGrid';
 import './PlaylistCard.css';
 import { playlistService } from '../../services/playlistService';
@@ -72,16 +72,17 @@ const Playlists = ({ onPlaylistClick, onPlayClick }) => {
       {/* Sticky header */}
       <Box
         sx={{
-          px: 3,
-          py: 3,
+          pt: 3,
+          pb: 2,
+          px: 2,
           position: 'sticky',
           top: 0,
           zIndex: 2,
-          background: 'var(--background, #121212)',
+          background: 'var(--background-elevated-base)',
         }}
       >
         <Typography
-          variant="h4"
+          variant="h6"
           sx={{
             color: 'var(--text-base)',
             fontWeight: 700,
@@ -90,6 +91,7 @@ const Playlists = ({ onPlaylistClick, onPlayClick }) => {
           Your Playlists
         </Typography>
       </Box>
+      <Divider sx={{ borderColor: 'var(--background-tinted-base)' }} />
 
       {/* Scrollable playlists list */}
       <Box className="playlist-card" sx={{ flex: 1, overflowY: 'auto', px: 3, pb: 3 }}>

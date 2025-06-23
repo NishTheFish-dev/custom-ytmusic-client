@@ -3,20 +3,24 @@ import { Box, Typography, Card, CardContent, CardMedia } from '@mui/material';
 import './AlbumCard.css';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
+/*
+ * AlbumGrid – displays playlist/album cards in a responsive grid.
+ * Copied from previous backup implementation without functional changes.
+ */
 const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
   return (
     <Box
       className="playlist-card"
       sx={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-        gap: '16px',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+        gap: '12px',
         padding: '8px 16px',
         overflowY: 'auto',
         height: '100%',
       }}
     >
-      {items.map((item) => (
+      {items.map(item => (
         <Card
           key={item.id}
           className="album-card"
@@ -34,25 +38,27 @@ const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
             },
             cursor: 'pointer',
             position: 'relative',
-            padding: '16px',
+            padding: '8px',
             width: '100%',
             height: '100%',
-            minHeight: '220px',
+            minHeight: '180px',
             boxSizing: 'border-box',
             boxShadow: '0 8px 24px rgba(0,0,0,.5)',
           }}
           onClick={() => onItemClick(item)}
         >
           <Box sx={{ position: 'relative' }}>
-            <Box sx={{ 
-              position: 'relative', 
-              width: '100%', 
-              paddingBottom: '100%', 
-              marginBottom: '16px',
-              borderRadius: '4px',
-              overflow: 'hidden',
-              boxShadow: '0 4px 20px rgba(0,0,0,.5)'
-            }}>
+            <Box
+              sx={{
+                position: 'relative',
+                width: '100%',
+                paddingBottom: '100%',
+                marginBottom: '16px',
+                borderRadius: '4px',
+                overflow: 'hidden',
+                boxShadow: '0 4px 20px rgba(0,0,0,.5)',
+              }}
+            >
               <CardMedia
                 component="img"
                 image={item.thumbnail}
@@ -75,7 +81,7 @@ const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
                 position: 'absolute',
                 bottom: 16,
                 right: 16,
-                backgroundColor: 'var(--background-base, #1DB954)',
+                backgroundColor: 'var(--essential-accent)',
                 borderRadius: '50%',
                 width: 48,
                 height: 48,
@@ -88,10 +94,9 @@ const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
                 boxShadow: '0 4px 20px rgba(0,0,0,.5)',
                 '&:hover': {
                   transform: 'scale(1.06)',
-                  backgroundColor: 'var(--background-highlight, #1ED760)',
                 },
               }}
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 onPlayClick(item);
               }}
@@ -103,15 +108,13 @@ const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
             <Typography
               variant="subtitle1"
               sx={{
-                color: 'var(--text-base, #FFFFFF)',
+                color: 'var(--text-base)',
                 fontSize: '1rem',
                 fontWeight: 700,
                 mb: 1,
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
-                letterSpacing: 'normal',
-                lineHeight: '1.5',
               }}
             >
               {item.title}
@@ -119,14 +122,11 @@ const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
             <Typography
               variant="body2"
               sx={{
-                color: 'var(--text-subdued, #B3B3B3)',
+                color: 'var(--text-subdued)',
                 fontSize: '0.875rem',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
-                fontWeight: 400,
-                letterSpacing: 'normal',
-                lineHeight: '1.5',
               }}
             >
               {item.subtitle}
@@ -138,4 +138,4 @@ const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
   );
 };
 
-export default AlbumGrid; 
+export default AlbumGrid;
