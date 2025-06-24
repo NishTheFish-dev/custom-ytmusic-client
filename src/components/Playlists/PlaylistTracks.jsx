@@ -3,7 +3,7 @@ import { useAudio } from '../../context/AudioContext';
 
 import { Box, Typography, IconButton, CircularProgress, Skeleton } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+
 import { playlistService } from '../../services/playlistService';
 import { FixedSizeList as List, areEqual } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -20,6 +20,8 @@ const PLAYER_BAR_HEIGHT = 90;
 const STICKY_HEADER_HEIGHT = 152; // px (120px image + 2*16px py + margins)
 
 const PlaylistTracks = ({ playlist, isQueueOpen }) => {
+  // Recalculate row layout instantly when queue visibility toggles
+  const listRef = useRef();
   
   const truncateTitle = (title) => {
     if (!isQueueOpen) return title;
@@ -35,9 +37,18 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
 
   // Use a requestId to prevent race conditions
   const requestIdRef = useRef(0);
-  const listRef = useRef();
+  
   const [fastScroll, setFastScroll] = useState(false);
   const itemData = useMemo(() => ({ tracks, fastScroll }), [tracks, fastScroll]);
+
+  // When the queue opens/closes, the list width changes. Prompt react-window to
+  // recompute item positions immediately to avoid the brief "stuck" visuals.
+  useEffect(() => {
+    if (listRef.current && typeof listRef.current.resetAfterIndex === 'function') {
+      // false => don't force a re-render of visible rows, just recalc sizes
+      listRef.current.resetAfterIndex(0, false);
+    }
+  }, [isQueueOpen]);
   const lastScrollRef = useRef({ offset: 0, time: Date.now() });
   const scrollTimeoutRef = useRef(null);
 
@@ -223,13 +234,12 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
   // Row renderer for react-window
   // Row renderer for react-window (memoized for performance)
 const Row = React.memo(({ index, style, data }) => {
-  const { tracks: rowTracks, fastScroll } = data;
+  const { tracks: rowTracks, fastScroll: isFastScroll } = data;
   const track = rowTracks[index];
   if (!track) return null;
 
-
-  // Show lightweight placeholder while FAST scrolling
-  if (fastScroll) {
+  // Placeholder during very fast scroll
+  if (isFastScroll) {
     return (
       <Box style={style} sx={{ height: TRACK_ROW_HEIGHT, px: 2, display: 'flex', alignItems: 'center' }}>
         <Skeleton variant="rectangular" width="100%" height={40} />
@@ -237,127 +247,93 @@ const Row = React.memo(({ index, style, data }) => {
     );
   }
 
+  const handlePlayClick = () => {
+    setFullPlaylist(rowTracks);
+    if (!track.id) return;
+    playTrack({
+      id: track.id,
+      title: track.title,
+      artist: track.artist,
+      thumbnail: track.thumbnail,
+      duration: track.duration,
+    });
+    const rest = shuffle
+      ? rowTracks.filter(t => t.id !== track.id).sort(() => Math.random() - 0.5)
+      : rowTracks.slice(index + 1);
+    setQueue(rest);
+  };
 
-    const handlePlayClick = () => {
-    // store entire playlist for global shuffle reference
-    setFullPlaylist(tracks);
-      if (!track.id) {
-
-        return;
-      }
-      playTrack({
-        id: track.id,
-        title: track.title,
-        artist: track.artist,
-        thumbnail: track.thumbnail,
-        duration: track.duration,
-      });
-      // Build queue depending on shuffle state
-      let rest;
-      if (shuffle) {
-        // Shuffle ON: keep existing behaviour – queue is all other tracks randomly ordered
-        rest = tracks.filter(t => t.id !== track.id);
-        rest = [...rest];
-        for (let i = rest.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [rest[i], rest[j]] = [rest[j], rest[i]];
-        }
-      } else {
-        // Shuffle OFF: queue should start from the song immediately after the picked one
-        rest = tracks.slice(index + 1);
-      }
-      setQueue(rest);
-    };
-
-    return (
-      <Box
-        style={style}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          py: 2,
-          px: 1,
-          height: TRACK_ROW_HEIGHT,
-          '&:hover': {
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          },
-        }}
-      >
-        <Typography
-          sx={{
-            width: 40,
-            textAlign: 'center',
-            color: 'var(--text-subdued)',
-            fontSize: '1.1rem',
-          }}
-        >
+  return (
+    <Box
+      style={style}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        py: 2,
+        px: 1,
+        height: TRACK_ROW_HEIGHT,
+        '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' },
+        '&:hover .track-number': { display: 'none' },
+        '&:hover .play-btn': { visibility: 'visible' },
+      }}
+    >
+      {/* Index / Play button */}
+      <Box sx={{ width: 40, textAlign: 'center', position: 'relative' }}>
+        <Typography className="track-number" sx={{ color: 'var(--text-subdued)', fontSize: '1.1rem' }}>
           {index + 1}
         </Typography>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            flex: 1,
-            minWidth: 0,
-            ml: 2,
-          }}
-        >
-          <img
-            src={track.thumbnail}
-            alt={track.title}
-            style={{
-              width: 40,
-              height: 40,
-              objectFit: 'cover',
-              marginRight: 16,
-            }}
-          />
-          <Box>
-            <Typography
-              sx={{
-                color: 'var(--text-base)',
-                fontSize: '1.05rem',
-                fontWeight: 500,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                              }}
-            >
-              {truncateTitle(track.title)}
-            </Typography>
-            <Typography
-              sx={{
-                color: 'var(--text-subdued)',
-                fontSize: '0.95rem',
-              }}
-            >
-              {track.artist}
-            </Typography>
-          </Box>
-        </Box>
-        <Typography
-          sx={{
-            color: 'var(--text-subdued)',
-            fontSize: '1.05rem',
-            width: 100,
-            textAlign: 'right',
-          }}
-        >
-          {track.duration}
-        </Typography>
         <IconButton
+          className="play-btn"
           size="small"
           onClick={handlePlayClick}
-          sx={{ ml: 2 }}
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            visibility: 'hidden',
+            p: 0.5,
+          }}
         >
-          <PlayArrowIcon />
-        </IconButton>
-        <IconButton size="small">
-          <MoreVertIcon />
+          <PlayArrowIcon fontSize="small" />
         </IconButton>
       </Box>
-    );
-  }, areEqual);
+
+      {/* Thumbnail and titles */}
+      <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, ml: 2 }}>
+        <img
+          src={track.thumbnail}
+          alt={track.title}
+          style={{ width: 40, height: 40, objectFit: 'cover', marginRight: 16 }}
+        />
+        <Box>
+          <Typography
+            sx={{
+              color: 'var(--text-base)',
+              fontSize: '1.05rem',
+              fontWeight: 500,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {truncateTitle(track.title)}
+          </Typography>
+          <Typography sx={{ color: 'var(--text-subdued)', fontSize: '0.95rem' }}>
+            {track.artist}
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Duration */}
+      <Typography sx={{ color: 'var(--text-subdued)', fontSize: '1.05rem', width: 100, textAlign: 'right' }}>
+        {track.duration}
+      </Typography>
+    </Box>
+  );
+}, areEqual);
+
+
 
   // Main layout container
   return (

@@ -104,7 +104,7 @@ const PlaylistList = ({ items, onItemClick, onPlayClick }) => {
             size="small"
             onClick={e => {
               e.stopPropagation();
-              onPlayClick(item);
+              onPlayClick && onPlayClick(item);
             }}
             sx={{
               backgroundColor: 'var(--essential-accent)',

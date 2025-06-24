@@ -77,8 +77,8 @@ const QueuePanel = ({ queue, currentTrack, onTrackClick, onTrackPlay, onTrackRem
 
         {/* Upcoming */}
         <List sx={{ flex: 1, overflow: 'auto' }}>
-          {queue.map(track => (
-            <ListItem key={track.id} sx={{ px: 2 }}>
+          {queue.map((track, idx) => (
+            <ListItem key={`${track.id}-${idx}`} sx={{ px: 2 }}>
               <ListItemAvatar>
                 <Avatar
                   src={track.thumbnail}

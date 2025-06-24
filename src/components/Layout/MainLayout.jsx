@@ -7,7 +7,15 @@ import Box from '@mui/material/Box';
  * Each column receives its content via props so parent can decide what to render.
  * The component itself is purely presentational.
  */
-const MainLayout = ({ left, center, right }) => {
+const MainLayout = ({ left, center, right, isQueueOpen = true }) => {
+  // Determine if the right-hand column (queue) should be shown
+  const hasRight = Boolean(right) && isQueueOpen;
+
+  // Flex ratios roughly mirror the previous 1.2 / 2.2 / 1.2 split (total 4.6)
+  const flexLeft = 1.2;
+  const flexRight = 1.2;
+  const flexCenter = hasRight ? 2.2 : 2.2 + flexRight; // 3.4 when queue is hidden
+
   return (
     <Box
       sx={{
@@ -36,7 +44,7 @@ const MainLayout = ({ left, center, right }) => {
       {/* Center – 2/5 (40%) */}
       <Box
         sx={{
-          flex: 2.2,
+          flex: flexCenter,
           
           minWidth: 0,
           display: 'flex',
@@ -47,13 +55,12 @@ const MainLayout = ({ left, center, right }) => {
         {center}
       </Box>
 
-      {/* Right – 1.5/5 */}
+      {/* Right – queue column (kept mounted to avoid re-mount lag) */}
       <Box
         sx={{
-          flex: 1.2,
-          
+          flex: hasRight ? flexRight : 0,
           minWidth: 0,
-          display: 'flex',
+          display: hasRight ? 'flex' : 'none',
           flexDirection: 'column',
           overflow: 'hidden',
         }}

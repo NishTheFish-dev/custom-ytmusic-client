@@ -12,6 +12,7 @@ import ContentCard from './components/Layout/ContentCard';
 import QueueCard from './components/Layout/QueueCard';
 import MainLayout from './components/Layout/MainLayout';
 import Playlists from './components/Playlists/Playlists';
+import { playlistService } from './services/playlistService';
 import PlaylistTracks from './components/Playlists/PlaylistTracks';
 import SearchResults from './components/Search/SearchResults';
 import { authService } from './services/authService';
@@ -40,7 +41,7 @@ const darkTheme = createTheme({
 
 function App() {
   /* Context */
-  const { currentTrack, queue } = useAudio();
+  const { currentTrack, queue, playTrack, setQueue, setFullPlaylist, shuffle } = useAudio();
 
   /* State */
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -120,6 +121,32 @@ function App() {
 
   const handleToggleQueue = () => setShowQueue(prev => !prev);
 
+  // Play entire playlist starting from first track
+  const handlePlaylistPlay = async (playlist) => {
+    if (!playlist?.id) return;
+    try {
+      const tracks = await playlistService.getPlaylistItems(playlist.id);
+      if (!tracks || tracks.length === 0) return;
+      // Store full playlist for shuffle reference etc.
+      setFullPlaylist(tracks);
+      // Play first track
+      playTrack(tracks[0]);
+      // Build queue with remaining tracks
+      let rest = tracks.slice(1);
+      if (shuffle) {
+        rest = [...rest];
+        for (let i = rest.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [rest[i], rest[j]] = [rest[j], rest[i]];
+        }
+      }
+      setQueue(rest);
+
+    } catch (err) {
+      console.error('Failed to play playlist:', err);
+    }
+  };
+
   /* Render helpers */
   const renderCenterContent = () => {
     switch (currentView) {
@@ -196,11 +223,10 @@ function App() {
             }}
           >
             <MainLayout
-              left={<PlaylistCard onPlaylistSelect={handleSidebarPlaylistClick} />}
+              left={<PlaylistCard onPlaylistSelect={handleSidebarPlaylistClick} onPlayClick={handlePlaylistPlay} />}
               center={<ContentCard>{renderCenterContent()}</ContentCard>}
-              right={
-                showQueue ? <QueueCard queue={queue} currentTrack={currentTrack} /> : null
-              }
+              right={<QueueCard queue={queue} currentTrack={currentTrack} />}
+              isQueueOpen={showQueue}
             />
           </Box>
         </Box>

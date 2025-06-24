@@ -6,7 +6,7 @@ import AlbumScrollCard from './AlbumScrollCard';
  * PlaylistCard – left column container that displays the user's playlists.
  * Relies on the existing <Playlists /> component for listing functionality.
  */
-const PlaylistCard = ({ onPlaylistSelect }) => {
+const PlaylistCard = ({ onPlaylistSelect, onPlayClick }) => {
   return (
     <Box
       sx={{
@@ -22,7 +22,7 @@ const PlaylistCard = ({ onPlaylistSelect }) => {
         m: 1,
       }}
     >
-      <AlbumScrollCard onPlaylistClick={onPlaylistSelect} />
+      <AlbumScrollCard onPlaylistClick={onPlaylistSelect} onPlayClick={onPlayClick} />
     </Box>
   );
 };

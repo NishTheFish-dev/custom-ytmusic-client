@@ -9,6 +9,7 @@ import {
   useTheme,
 } from '@mui/material';
 import {
+  Settings,
   Home as HomeIcon,
   Search as SearchIcon,
   PlayArrow,
@@ -73,40 +74,47 @@ const TopControls = ({ onHomeClick, onSearch }) => {
     >
       <Box
         sx={{
-          position: 'relative',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
           width: '100%',
           height: '100%',
+          px: 0,
         }}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            maxWidth: '600px',
-            width: '100%',
-            margin: '0 auto',
-            padding: '0 24px',
-          }}
-        >
+        {/* Left cluster */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <IconButton
+            sx={{
+              color: 'var(--text-base)',
+              '&:hover': { backgroundColor: 'var(--background-highlight)' },
+              WebkitAppRegion: 'no-drag',
+            }}
+          >
+            <Settings />
+          </IconButton>
           <IconButton
             onClick={onHomeClick}
             sx={{
               color: 'var(--text-base)',
-              '&:hover': {
-                backgroundColor: 'var(--background-highlight)',
-              },
-              marginRight: 2,
+              '&:hover': { backgroundColor: 'var(--background-highlight)' },
               WebkitAppRegion: 'no-drag',
             }}
           >
             <HomeIcon />
           </IconButton>
+        </Box>
 
-          <Box sx={{ flex: 1, maxWidth: '600px' }}>
-            <TextField
+        {/* Center search bar */}
+        <Box
+          sx={{
+            position: 'absolute',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '46.4%',
+            pointerEvents: 'auto',
+          }}
+        >
+          <TextField
               placeholder="Search for songs, artists, or playlists"
               variant="outlined"
               size="small"
@@ -142,13 +150,7 @@ const TopControls = ({ onHomeClick, onSearch }) => {
                   backgroundColor: 'var(--background-elevated-base)',
                   borderRadius: 2,
                   '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'transparent',
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'var(--background-highlight)',
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'var(--essential-bright-accent)',
+                    borderColor: 'transparent !important',
                   },
                   '& input': {
                     color: 'var(--text-base)',
@@ -164,7 +166,6 @@ const TopControls = ({ onHomeClick, onSearch }) => {
           </Box>
         </Box>
       </Box>
-    </Box>
   );
 };
 
