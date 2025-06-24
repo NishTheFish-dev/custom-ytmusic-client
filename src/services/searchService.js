@@ -9,15 +9,56 @@ class SearchService {
 
   async search(query, type = 'all') {
     try {
-      const response = await youtubeApi.searchVideos(query, 25);
-      // The electron bridge may return either an object with an `items` array (YouTube Data API response)
-      // or a plain array of results. Handle both cases gracefully.
-      const items = Array.isArray(response) ? response : response.items || response.data?.items || [];
-      this.searchResults = items;
+      let combined = [];
+
+      if (type === 'all') {
+        try {
+          const res = await youtubeApi.searchAll(query, 25);
+          const items = Array.isArray(res) ? res : res.items || res.data?.items || [];
+          combined = items.map(item => {
+            const resultType = item.id?.kind?.includes('playlist') || item.id?.playlistId ? 'playlist' : 'video';
+            return { ...item, _resultType: resultType };
+          });
+        } catch (err) {
+          // Fallback to separate calls if unified search fails (older token scopes, etc.)
+          console.warn('searchAll failed, falling back to separate calls', err);
+          type = 'fallback';
+        }
+      }
+      if (type !== 'all' && type !== 'fallback') {
+        // handled above
+      }
+      if (type === 'fallback') {
+
+        const tasks = [];
+        // After failure of unified search, fetch both videos and playlists separately
+        const includeVideos = true;
+        const includePlaylists = true;
+
+        if (includeVideos) {
+          tasks.push(
+            youtubeApi.searchVideos(query, 25).then(res => {
+              const items = Array.isArray(res) ? res : res.items || res.data?.items || [];
+              return items.map(item => ({ ...item, _resultType: 'video' }));
+            })
+          );
+        }
+        if (includePlaylists) {
+          tasks.push(
+            youtubeApi.searchPlaylists(query, 25).then(res => {
+              const items = Array.isArray(res) ? res : res.items || res.data?.items || [];
+              return items.map(item => ({ ...item, _resultType: 'playlist' }));
+            })
+          );
+        }
+        const nested = await Promise.all(tasks);
+        combined = nested.flat();
+      }
+
+      this.searchResults = combined;
       this.addToSearchHistory(query);
       return this.searchResults;
     } catch (error) {
-
       throw error;
     }
   }

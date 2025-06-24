@@ -64,6 +64,10 @@ contextBridge.exposeInMainWorld(
       searchVideos: (query, maxResults) => ipcRenderer.invoke('youtube:searchVideos', { query, maxResults }),
       getVideoDetails: (videoId) => ipcRenderer.invoke('youtube:getVideoDetails', videoId),
       getUserPlaylists: () => ipcRenderer.invoke('youtube:getUserPlaylists'),
+      getLibraryPlaylists: () => ipcRenderer.invoke('youtube:getLibraryPlaylists'),
+      getLikedPlaylists: () => ipcRenderer.invoke('youtube:getLikedPlaylists'),
+      searchPlaylists: (query, maxResults) => ipcRenderer.invoke('youtube:searchPlaylists', { query, maxResults }),
+      searchAll: (query, maxResults) => ipcRenderer.invoke('youtube:searchAll', { query, maxResults }),
       getPlaylistItems: (playlistId, pageToken) => ipcRenderer.invoke('youtube:getPlaylistItems', playlistId, pageToken),
       isAuthenticated: () => ipcRenderer.invoke('youtube:isAuthenticated'),
       getCookies: () => ipcRenderer.invoke('youtube:getCookies')

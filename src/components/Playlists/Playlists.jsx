@@ -17,7 +17,7 @@ const Playlists = ({ onPlaylistClick, onPlayClick }) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await playlistService.getUserPlaylists();
+      const data = await playlistService.getAllPlaylists();
       setPlaylists(data);
     } catch (err) {
       setError('Failed to load playlists');

@@ -130,6 +130,7 @@ class PlaylistService {
     }
   }
 
+  // Fetch playlists created by the user (ownership)
   async getUserPlaylists() {
     try {
       const response = await window.electronAPI.youtube.getUserPlaylists();
@@ -147,6 +148,59 @@ class PlaylistService {
 
       throw error;
     }
+  }
+
+  // Fetch playlists that the user has saved (but may not own)
+  async getLibraryPlaylists() {
+    try {
+      const response = await window.electronAPI.youtube.getLibraryPlaylists();
+      const items = response.items || response; // bridge might already map
+      return items.map(this._mapPlaylist);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Fetch playlists that the user has explicitly liked (thumbs-up on playlist)
+  async getLikedPlaylists() {
+    try {
+      const response = await window.electronAPI.youtube.getLikedPlaylists();
+      const items = response.items || response;
+      return items.map(this._mapPlaylist);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Convenience: merge all three playlist categories
+  async getAllPlaylists() {
+    const [created, saved, liked] = await Promise.all([
+      this.getUserPlaylists(),
+      this.getLibraryPlaylists(),
+      this.getLikedPlaylists(),
+    ]);
+    // Deduplicate by id (liked/saved could overlap)
+    const map = new Map();
+    [...created, ...saved, ...liked].forEach(pl => {
+      if (!map.has(pl.id)) map.set(pl.id, pl);
+    });
+    return Array.from(map.values());
+  }
+
+  // Internal helper to normalise API playlist objects
+  _mapPlaylist(playlist) {
+    return {
+      id: playlist.id,
+      title: playlist.snippet?.title ?? playlist.title,
+      description: playlist.snippet?.description ?? playlist.description,
+      thumbnail:
+        playlist.snippet?.thumbnails?.maxres?.url ||
+        playlist.snippet?.thumbnails?.high?.url ||
+        playlist.snippet?.thumbnails?.default?.url ||
+        playlist.thumbnail,
+      itemCount: playlist.contentDetails?.itemCount ?? playlist.itemCount,
+      channelTitle: playlist.snippet?.channelTitle ?? playlist.channelTitle,
+    };
   }
 
   async getPlaylistItems(playlistId) {

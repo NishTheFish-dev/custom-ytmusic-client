@@ -1,7 +1,10 @@
 import React from 'react';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import { playlistService } from '../../services/playlistService';
 import { useAudio } from '../../context/AudioContext';
+import Chip from '@mui/material/Chip';
 import { youtubeApi } from '../../services/youtubeApi';
 
 import {
@@ -22,7 +25,7 @@ import {
  *   results: array – array of video objects returned from YouTube search
  *   query: string – original search query (used for heading)
  */
-const SearchResults = ({ results = [], query = '', isQueueOpen = false }) => {
+const SearchResults = ({ results = [], query = '', isQueueOpen = false, onPlaylistClick }) => {
 
   const truncateTitle = (title) => {
     if (!isQueueOpen) return title;
@@ -64,6 +67,73 @@ const SearchResults = ({ results = [], query = '', isQueueOpen = false }) => {
       </Typography>
       <List>
         {results.map((item, index) => {
+          if (item._resultType === 'playlist') {
+            // Ensure we use a primitive string key – YouTube API returns id as object
+            const playlistId = item.id?.playlistId || (typeof item.id === 'string' ? item.id : undefined);
+            const playlist = {
+              id: playlistId,
+              title: getTitle(item),
+              channelTitle: getChannel(item),
+              itemCount: item.contentDetails?.itemCount || item.itemCount || 0,
+              thumbnail: getThumbnail(item),
+            };
+            const handlePlaylistPlay = async () => {
+              try {
+                const tracks = await playlistService.getPlaylistItems(playlist.id);
+                if (!tracks || tracks.length === 0) return;
+                playTrack(tracks[0]);
+                setQueue(tracks.slice(1));
+              } catch (err) {
+                console.error('Failed to play playlist:', err);
+              }
+            };
+            return (
+              <ListItem
+                key={playlistId ?? index}
+                onClick={() => onPlaylistClick && onPlaylistClick(playlist)}
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': {
+                    backgroundColor: 'var(--background-highlight)',
+                  },
+                }}
+              >
+                <ListItemAvatar>
+                  <Avatar
+                    variant="square"
+                    src={playlist.thumbnail}
+                    alt={playlist.title}
+                    sx={{ width: 56, height: 56, mr: 2, borderRadius: 1 }}
+                  />
+                </ListItemAvatar>
+                <ListItemText
+                  sx={{ minWidth: 0 }}
+                  primary={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {truncateTitle(playlist.title)}
+                      </span>
+                    </Box>
+                  }
+                  secondary={playlist.channelTitle}
+                  primaryTypographyProps={{ sx: { color: 'var(--text-base)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}
+                  secondaryTypographyProps={{ color: 'var(--text-subdued)' }}
+                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Chip
+                    icon={<PlaylistPlayIcon sx={{ color: 'inherit' }} />}
+                    label="Playlist"
+                    size="small"
+                    sx={{ backgroundColor: 'var(--background-highlight)', color: 'var(--text-subdued)' }}
+                  />
+                  <IconButton size="small" onClick={handlePlaylistPlay}>
+                    <PlayArrowIcon />
+                  </IconButton>
+                </Box>
+              </ListItem>
+            );
+          }
+
           const track = {
             id: item.id?.videoId || item.videoId || item.id,
             title: getTitle(item),
@@ -82,6 +152,7 @@ const SearchResults = ({ results = [], query = '', isQueueOpen = false }) => {
           };
 
           const fetchDuration = async (vid) => {
+            if (!vid || typeof vid !== 'string') return '';
             try {
               const details = await youtubeApi.getVideoDetails(vid);
               const iso = details?.contentDetails?.duration;
@@ -97,8 +168,8 @@ const SearchResults = ({ results = [], query = '', isQueueOpen = false }) => {
             const dur = await fetchDuration(track.id);
             const trackWithDur = { ...track, duration: dur };
             playTrack(trackWithDur);
-            // build queue starting from next items
-            const rest = results.slice(index + 1).map((it) => ({
+            // build queue starting from next items, include only video results
+            const rest = results.slice(index + 1).filter(it => it._resultType !== 'playlist').map((it) => ({
               id: it.id?.videoId || it.videoId || it.id,
               title: getTitle(it),
               artist: getChannel(it),
@@ -109,7 +180,7 @@ const SearchResults = ({ results = [], query = '', isQueueOpen = false }) => {
           };
           return (
             <ListItem
-              key={track.id || index}
+              key={track.id ?? index}
               sx={{
                 '&:hover': {
                   backgroundColor: 'var(--background-highlight)',
@@ -131,12 +202,17 @@ const SearchResults = ({ results = [], query = '', isQueueOpen = false }) => {
                 primaryTypographyProps={{ sx: { color: 'var(--text-base)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}
                 secondaryTypographyProps={{ color: 'var(--text-subdued)' }}
               />
-              <IconButton size="small" onClick={handlePlayClick} sx={{ ml: 1 }}>
-                <PlayArrowIcon />
-              </IconButton>
-              <IconButton size="small" sx={{ ml: 0.5 }}>
-                <MoreVertIcon />
-              </IconButton>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Chip
+                  icon={<MusicNoteIcon sx={{ color: 'inherit' }} />}
+                  label="Song"
+                  size="small"
+                  sx={{ backgroundColor: 'var(--background-highlight)', color: 'var(--text-subdued)' }}
+                />
+                <IconButton size="small" onClick={handlePlayClick}>
+                  <PlayArrowIcon />
+                </IconButton>
+              </Box>
             </ListItem>
           );
         })}

@@ -11,6 +11,8 @@ import {
 import {
   Settings,
   Home as HomeIcon,
+  ArrowBackIosNew as ArrowBackIcon,
+  ArrowForwardIos as ArrowForwardIcon,
   Search as SearchIcon,
   PlayArrow,
   Pause,
@@ -31,14 +33,21 @@ import { useAudio } from '../context/AudioContext';
  * file so their UI is rendered directly on the application "floor" (no raised nav bars).
  *
  * Props:
- * - onHomeClick      : () => void
+ * -       : () => void
  * - onSearch         : (query: string) => void
  * - onToggleQueue    : () => void   (toggles the queue sidebar)
  */
-const GlobalControls = ({ onHomeClick, onSearch, onToggleQueue }) => {
+const GlobalControls = ({ onHomeClick, onSearch, onToggleQueue, onNavigateBack, onNavigateForward, canGoBack = false, canGoForward = false }) => {
   return (
     <>
-      <TopControls onHomeClick={onHomeClick} onSearch={onSearch} />
+      <TopControls
+        onHomeClick={onHomeClick}
+        onSearch={onSearch}
+        onNavigateBack={onNavigateBack}
+        onNavigateForward={onNavigateForward}
+        canGoBack={canGoBack}
+        canGoForward={canGoForward}
+      />
       <BottomPlayerControls onToggleQueue={onToggleQueue} />
     </>
   );
@@ -47,7 +56,7 @@ const GlobalControls = ({ onHomeClick, onSearch, onToggleQueue }) => {
 /* -------------------------------------------------------------------------- */
 /*                              Top (Search) Bar                              */
 /* -------------------------------------------------------------------------- */
-const TopControls = ({ onHomeClick, onSearch }) => {
+const TopControls = ({ onHomeClick, onSearch, onNavigateBack, onNavigateForward, canGoBack, canGoForward }) => {
   const [searchText, setSearchText] = useState('');
 
   return (
@@ -98,9 +107,32 @@ const TopControls = ({ onHomeClick, onSearch }) => {
               color: 'var(--text-base)',
               '&:hover': { backgroundColor: 'var(--background-highlight)' },
               WebkitAppRegion: 'no-drag',
+              mr: 2, // extra gap after Home
             }}
           >
             <HomeIcon />
+          </IconButton>
+          <IconButton
+            onClick={onNavigateBack}
+            disabled={!canGoBack}
+            sx={{
+              color: 'var(--text-base)',
+              '&:hover': { backgroundColor: 'var(--background-highlight)' },
+              WebkitAppRegion: 'no-drag',
+            }}
+          >
+            <ArrowBackIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            onClick={onNavigateForward}
+            disabled={!canGoForward}
+            sx={{
+              color: 'var(--text-base)',
+              '&:hover': { backgroundColor: 'var(--background-highlight)' },
+              WebkitAppRegion: 'no-drag',
+            }}
+          >
+            <ArrowForwardIcon fontSize="small" />
           </IconButton>
         </Box>
 
@@ -115,57 +147,57 @@ const TopControls = ({ onHomeClick, onSearch }) => {
           }}
         >
           <TextField
-              placeholder="Search for songs, artists, or playlists"
-              variant="outlined"
-              size="small"
-              fullWidth
-              sx={{ WebkitAppRegion: 'no-drag' }}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  onSearch(searchText);
-                }
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <IconButton
-                      onClick={() => {
-                        if (searchText.trim()) onSearch(searchText);
-                      }}
-                      edge="start"
-                      sx={{
-                        color: 'var(--text-subdued)',
-                        '&:hover': {
-                          backgroundColor: 'transparent',
-                        },
-                      }}
-                    >
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                sx: {
-                  backgroundColor: 'var(--background-elevated-base)',
-                  borderRadius: 2,
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'transparent !important',
-                  },
-                  '& input': {
-                    color: 'var(--text-base)',
-                    padding: '8.5px 0',
-                    '&::placeholder': {
+            placeholder="Search for songs, artists, or playlists"
+            variant="outlined"
+            size="small"
+            fullWidth
+            sx={{ WebkitAppRegion: 'no-drag' }}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                onSearch(searchText);
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IconButton
+                    onClick={() => {
+                      if (searchText.trim()) onSearch(searchText);
+                    }}
+                    edge="start"
+                    sx={{
                       color: 'var(--text-subdued)',
-                      opacity: 1,
-                    },
+                      '&:hover': {
+                        backgroundColor: 'transparent',
+                      },
+                    }}
+                  >
+                    <SearchIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+              sx: {
+                backgroundColor: 'var(--background-elevated-base)',
+                borderRadius: 2,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'transparent !important',
+                },
+                '& input': {
+                  color: 'var(--text-base)',
+                  padding: '8.5px 0',
+                  '&::placeholder': {
+                    color: 'var(--text-subdued)',
+                    opacity: 1,
                   },
                 },
-              }}
-            />
-          </Box>
+              },
+            }}
+          />
         </Box>
       </Box>
+    </Box>
   );
 };
 

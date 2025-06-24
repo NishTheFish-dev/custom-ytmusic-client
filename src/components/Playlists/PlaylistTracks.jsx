@@ -360,7 +360,7 @@ const Row = React.memo(({ index, style, data }) => {
             {playlist?.title}
           </Typography>
           <Typography sx={{ color: 'var(--text-subdued)', fontSize: '0.9rem', mt: 0.5 }}>
-            {playlist?.channelTitle} • {playlist?.itemCount} songs
+            {playlist?.channelTitle} • {(tracks.length || playlist?.itemCount || 0)} songs
           </Typography>
         </Box>
       </Box>

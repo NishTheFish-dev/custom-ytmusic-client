@@ -48,6 +48,8 @@ function App() {
   const [googleUser, setGoogleUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState('home');
+  const [history, setHistory] = useState([{ view: 'home' }]);
+  const [historyIndex, setHistoryIndex] = useState(0);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [showQueue, setShowQueue] = useState(true);
   const [searchResults, setSearchResults] = useState([]);
@@ -94,7 +96,16 @@ function App() {
     } catch (_) {}
   };
 
+  const pushHistory = (entry) => {
+    setHistory(prev => {
+      const truncated = prev.slice(0, historyIndex + 1);
+      return [...truncated, entry];
+    });
+    setHistoryIndex(prev => prev + 1);
+  };
+
   const handleSidebarPlaylistClick = playlist => {
+    pushHistory({ view: 'playlist', playlist });
     setCurrentView('playlist');
     setSelectedPlaylist(playlist);
   };
@@ -102,12 +113,14 @@ function App() {
   const handleSearch = async query => {
     setSearchQuery(query);
     if (!query || query.trim().length === 0) {
+      pushHistory({ view: 'home' });
       setCurrentView('home');
       return;
     }
     try {
       const results = await searchService.search(query);
       setSearchResults(results);
+      pushHistory({ view: 'search', query, results });
       setCurrentView('search');
     } catch (error) {
       console.error('Search failed:', error);
@@ -115,6 +128,7 @@ function App() {
   };
 
   const handleHomeClick = () => {
+    pushHistory({ view: 'home' });
     setCurrentView('home');
     setSelectedPlaylist(null);
   };
@@ -148,6 +162,45 @@ function App() {
   };
 
   /* Render helpers */
+  const handleBack = () => {
+    if (historyIndex === 0) return;
+    const newIndex = historyIndex - 1;
+    setHistoryIndex(newIndex);
+    const entry = history[newIndex];
+    applyHistoryEntry(entry);
+  };
+
+  const handleForward = () => {
+    if (historyIndex >= history.length - 1) return;
+    const newIndex = historyIndex + 1;
+    setHistoryIndex(newIndex);
+    const entry = history[newIndex];
+    applyHistoryEntry(entry);
+  };
+
+  const applyHistoryEntry = (entry) => {
+    switch (entry.view) {
+      case 'home':
+        setCurrentView('home');
+        setSelectedPlaylist(null);
+        break;
+      case 'search':
+        setCurrentView('search');
+        setSearchQuery(entry.query || '');
+        setSearchResults(entry.results || []);
+        break;
+      case 'playlist':
+        setCurrentView('playlist');
+        setSelectedPlaylist(entry.playlist || null);
+        break;
+      case 'library':
+        setCurrentView('library');
+        break;
+      default:
+        break;
+    }
+  };
+
   const renderCenterContent = () => {
     switch (currentView) {
       case 'home':
@@ -159,7 +212,14 @@ function App() {
           </Box>
         );
       case 'search':
-        return <SearchResults results={searchResults} query={searchQuery} isQueueOpen={showQueue} />;
+        return (
+          <SearchResults
+            results={searchResults}
+            query={searchQuery}
+            isQueueOpen={showQueue}
+            onPlaylistClick={handleSidebarPlaylistClick}
+          />
+        );
       case 'library':
         return <Playlists onPlaylistClick={handleSidebarPlaylistClick} />;
       case 'playlist':
@@ -207,6 +267,10 @@ function App() {
               onHomeClick={handleHomeClick}
               onSearch={handleSearch}
               onToggleQueue={handleToggleQueue}
+              onNavigateBack={handleBack}
+              onNavigateForward={handleForward}
+              canGoBack={historyIndex > 0}
+              canGoForward={historyIndex < history.length - 1}
             />
           </Box>
 

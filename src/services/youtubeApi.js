@@ -56,6 +56,27 @@ class YouTubeApi {
   async getPlaylistItems(playlistId) {
     return await window.electronAPI.youtube.getPlaylistItems(playlistId);
   }
+
+  // New: playlists that the user has saved/subscribed to (not created)
+  async getLibraryPlaylists() {
+    return await window.electronAPI.youtube.getLibraryPlaylists();
+  }
+
+  // New: playlists explicitly marked as "liked" by the user ("👍" on a playlist)
+  async getLikedPlaylists() {
+    return await window.electronAPI.youtube.getLikedPlaylists();
+  }
+
+  // Mixed search (videos + playlists in single call)
+  async searchAll(query, maxResults = 25) {
+    return await window.electronAPI.youtube.searchAll(query, maxResults);
+  }
+
+  // Search playlists
+  async searchPlaylists(query, maxResults = 15) {
+    return await window.electronAPI.youtube.searchPlaylists(query, maxResults);
+  }
+
 }
 
 export const youtubeApi = new YouTubeApi(); 

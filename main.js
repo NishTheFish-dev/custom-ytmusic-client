@@ -282,6 +282,94 @@ ipcMain.handle('youtube:isAuthenticated', async () => {
   }
 });
 
+// Fetch playlists the user has saved/subscribed to (not owned)
+ipcMain.handle('youtube:getLibraryPlaylists', async () => {
+  try {
+    await ensureValidToken();
+    const response = await youtube.subscriptions.list({
+      auth: oauth2Client,
+      part: 'snippet',
+      mine: true,
+      maxResults: 50
+    });
+    const playlistSubs = (response.data.items || []).filter(item => item.snippet.resourceId.kind === 'youtube#playlist');
+    // For each, fetch playlist details in batch
+    const ids = playlistSubs.map(item => item.snippet.resourceId.playlistId).join(',');
+    if (!ids) return { items: [] };
+    const plRes = await youtube.playlists.list({
+      auth: oauth2Client,
+      part: 'snippet,contentDetails',
+      id: ids,
+      maxResults: 50
+    });
+    return plRes.data;
+  } catch (error) {
+    console.error('Error fetching library playlists:', error);
+    return { items: [] };
+  }
+});
+
+// Fetch playlists the user has liked (thumbs-up on a playlist) – not directly supported by API, fallback to empty
+ipcMain.handle('youtube:getLikedPlaylists', async () => {
+  return { items: [] }; // TODO: implement when API allows
+});
+
+// Search playlists
+ipcMain.handle('youtube:searchAll', async (event, arg1, arg2) => {
+  let query;
+  let maxResults = 25;
+  if (arg1 && typeof arg1 === 'object') {
+    query = arg1.query;
+    maxResults = arg1.maxResults ?? 25;
+  } else {
+    query = arg1;
+    if (typeof arg2 === 'number') maxResults = arg2;
+  }
+  try {
+    await ensureValidToken();
+    const response = await youtube.search.list({
+      auth: oauth2Client,
+      part: 'snippet',
+      q: query,
+      maxResults,
+      type: 'video,playlist',
+      fields: 'items(id(kind,videoId,playlistId),snippet(title,description,thumbnails(default,high,maxres),channelTitle))'
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error searching videos+playlists:', error);
+    return { items: [] };
+  }
+});
+
+ipcMain.handle('youtube:searchPlaylists', async (event, arg1, arg2) => {
+  // Support both legacy positional args (query, maxResults) and object style {query, maxResults}
+  let query;
+  let maxResults = 15;
+  if (arg1 && typeof arg1 === 'object') {
+    query = arg1.query;
+    maxResults = arg1.maxResults ?? 15;
+  } else {
+    query = arg1;
+    if (typeof arg2 === 'number') maxResults = arg2;
+  }
+  try {
+    await ensureValidToken();
+    const response = await youtube.search.list({
+      auth: oauth2Client,
+      part: 'snippet',
+      q: query,
+      maxResults,
+      type: 'playlist',
+      fields: 'items(id/playlistId,snippet(title,description,thumbnails(maxres,high,default),channelTitle))'
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error searching playlists:', error);
+    return { items: [] };
+  }
+});
+
 // Auth IPC handlers
 ipcMain.handle('auth:getStoredUser', async () => {
   try {
