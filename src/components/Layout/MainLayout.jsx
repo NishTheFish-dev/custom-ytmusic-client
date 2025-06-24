@@ -22,7 +22,7 @@ const MainLayout = ({ left, center, right }) => {
       {/* Left – 1.5/5 */}
       <Box
         sx={{
-          flex: 1.5,
+          flex: 1.2,
           
           minWidth: 0,
           display: 'flex',
@@ -36,7 +36,7 @@ const MainLayout = ({ left, center, right }) => {
       {/* Center – 2/5 (40%) */}
       <Box
         sx={{
-          flex: 2,
+          flex: 2.2,
           
           minWidth: 0,
           display: 'flex',
@@ -50,7 +50,7 @@ const MainLayout = ({ left, center, right }) => {
       {/* Right – 1.5/5 */}
       <Box
         sx={{
-          flex: 1.5,
+          flex: 1.2,
           
           minWidth: 0,
           display: 'flex',

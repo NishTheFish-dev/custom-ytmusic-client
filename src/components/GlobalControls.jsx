@@ -190,6 +190,9 @@ const BottomPlayerControls = ({ onToggleQueue }) => {
     cycleRepeat,
   } = useAudio();
 
+  // toggle between total duration and time remaining
+  const [showRemaining, setShowRemaining] = useState(false);
+
   const [prevVolume, setPrevVolume] = React.useState(volume);
   const theme = useTheme();
 
@@ -208,6 +211,8 @@ const BottomPlayerControls = ({ onToggleQueue }) => {
 
   const hasTrack = Boolean(currentTrack);
   const durationSeconds = hasTrack ? duration || parseDurationToSeconds(currentTrack?.duration) : 0;
+  const elapsedSeconds = (progress * durationSeconds) / 100;
+  const remainingSeconds = Math.max(durationSeconds - elapsedSeconds, 0);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -359,8 +364,17 @@ const BottomPlayerControls = ({ onToggleQueue }) => {
               },
             }}
           />
-          <Typography variant="caption" color="text.secondary" sx={{ minWidth: '40px' }}>
-            {hasTrack ? formatTime(durationSeconds) : '--:--'}
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ minWidth: '40px', cursor: hasTrack ? 'pointer' : 'default' }}
+            onClick={() => hasTrack && setShowRemaining((prev) => !prev)}
+          >
+            {hasTrack
+              ? showRemaining
+                ? `-${formatTime(remainingSeconds)}`
+                : formatTime(durationSeconds)
+              : '--:--'}
           </Typography>
         </Box>
       </Box>

@@ -594,7 +594,7 @@ async function createWindow() {
   mainWindow = new BrowserWindow({
     width: windowBounds.width,
     height: windowBounds.height,
-    minWidth: 1200,
+    minWidth: 1400,
     minHeight: 800,
     frame: true, // Keep the title bar
     titleBarStyle: 'hidden', // Hide the default title bar but keep window controls

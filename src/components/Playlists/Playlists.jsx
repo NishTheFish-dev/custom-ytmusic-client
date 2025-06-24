@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, CircularProgress, Divider } from '@mui/material';
-import AlbumGrid from '../Grid/AlbumGrid';
+import PlaylistList from './PlaylistList';
 import './PlaylistCard.css';
 import { playlistService } from '../../services/playlistService';
 
@@ -107,11 +107,13 @@ const Playlists = ({ onPlaylistClick, onPlayClick }) => {
             No playlists found. Create your first playlist on YouTube Music!
           </Typography>
         ) : (
-          <AlbumGrid
+          <PlaylistList
             items={playlists.map(playlist => ({
               id: playlist.id,
               title: playlist.title,
-              subtitle: `${playlist.itemCount} songs • ${playlist.channelTitle}`,
+              subtitle: playlist.channelTitle,
+              channelTitle: playlist.channelTitle,
+              itemCount: playlist.itemCount,
               thumbnail: playlist.thumbnail,
             }))}
             onItemClick={onPlaylistClick}

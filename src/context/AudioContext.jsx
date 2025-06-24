@@ -20,6 +20,7 @@ export const AudioProvider = ({ children }) => {
   const [repeatMode, setRepeatMode] = useState(0); // 0 = none, 1 = all, 2 = one
   const originalQueueRef = useRef([]); // keep snapshot for repeat all
   const progressInterval = useRef(null);
+  const lastSeekAtRef = useRef(0);
   // refs to keep latest mutable values inside event callbacks
   const queueRef = useRef(queue);
   const repeatModeRef = useRef(repeatMode);
@@ -41,7 +42,9 @@ export const AudioProvider = ({ children }) => {
         if (!dur) return;
         const cur = await YouTubePlayer.getCurrentTime();
         setDuration(dur);
-        setProgress((cur / dur) * 100);
+        // If a seek occurred very recently, skip one update to prevent rubber-band
+      if (Date.now() - lastSeekAtRef.current < 800) return;
+      setProgress((cur / dur) * 100);
       } catch (_) {}
     }, 1000);
   };
@@ -91,6 +94,7 @@ export const AudioProvider = ({ children }) => {
   }, []);
 
   const seek = useCallback(async (percentage) => {
+    lastSeekAtRef.current = Date.now();
     if (!currentTrack) return;
     const duration = await YouTubePlayer.getDuration();
     const seconds = (percentage / 100) * duration;

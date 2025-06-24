@@ -13,7 +13,7 @@ const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
       className="playlist-card"
       sx={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
         gap: '12px',
         padding: '8px 16px',
         overflowY: 'auto',
@@ -41,7 +41,7 @@ const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
             padding: '8px',
             width: '100%',
             height: '100%',
-            minHeight: '180px',
+            minHeight: '220px',
             boxSizing: 'border-box',
             boxShadow: '0 8px 24px rgba(0,0,0,.5)',
           }}
@@ -109,7 +109,7 @@ const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
               variant="subtitle1"
               sx={{
                 color: 'var(--text-base)',
-                fontSize: '1rem',
+                fontSize: '0.9rem',
                 fontWeight: 700,
                 mb: 1,
                 overflow: 'hidden',
@@ -123,7 +123,7 @@ const AlbumGrid = ({ items, onItemClick, onPlayClick }) => {
               variant="body2"
               sx={{
                 color: 'var(--text-subdued)',
-                fontSize: '0.875rem',
+                fontSize: '0.75rem',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',

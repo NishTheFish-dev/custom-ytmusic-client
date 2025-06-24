@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAudio } from '../../context/AudioContext';
 
 import { Box, Typography, IconButton, CircularProgress, Skeleton } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { playlistService } from '../../services/playlistService';
-import { FixedSizeList as List } from 'react-window';
+import { FixedSizeList as List, areEqual } from 'react-window';
 import AutoSizer from "react-virtualized-auto-sizer";
 
 const BATCH_SIZE = 50;
@@ -15,6 +15,7 @@ const ITEM_HEIGHT = 64;
 const WINDOW_SIZE = 30;
 const WINDOW_BUFFER = 10;
 const TRACK_ROW_HEIGHT = 68;
+const FAST_SCROLL_SPEED = 8; // px per ms ~2000px/s
 const PLAYER_BAR_HEIGHT = 90;
 const STICKY_HEADER_HEIGHT = 152; // px (120px image + 2*16px py + margins)
 
@@ -35,6 +36,10 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
   // Use a requestId to prevent race conditions
   const requestIdRef = useRef(0);
   const listRef = useRef();
+  const [fastScroll, setFastScroll] = useState(false);
+  const itemData = useMemo(() => ({ tracks, fastScroll }), [tracks, fastScroll]);
+  const lastScrollRef = useRef({ offset: 0, time: Date.now() });
+  const scrollTimeoutRef = useRef(null);
 
   // Refs for always-latest state
   const pageTokenRef = useRef(null);
@@ -49,6 +54,29 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
   useEffect(() => { tracksRef.current = tracks; }, [tracks]);
   useEffect(() => { hasMoreRef.current = hasMore; }, [hasMore]);
   useEffect(() => { loadingRef.current = loading; }, [loading]);
+
+  // Simple initial load
+  useEffect(() => {
+    const fetchInitial = async () => {
+      if (!playlist?.id) return;
+      setLoading(true);
+      try {
+        const { items, nextPageToken } = await playlistService.getPlaylistItemsPage(
+          playlist.id,
+          null
+        );
+        setTracks(items);
+        setPageToken(nextPageToken);
+        setHasMore(!!nextPageToken);
+        setInitialLoad(false);
+      } catch (_) {
+        setTracks([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInitial();
+  }, [playlist?.id]);
 
   // Stable function to load more tracks (initial and subsequent pages)
   const loadMoreTracks = useCallback(async () => {
@@ -117,6 +145,37 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playlist?.id]);
 
+  // Fallback: if initial paged fetch returns no items, try full fetch
+  useEffect(() => {
+    if (!initialLoad && !loading && tracks.length === 0 && playlist?.id) {
+      (async () => {
+        try {
+          setLoading(true);
+          const all = await playlistService.getPlaylistItems(playlist.id);
+          setTracks(all);
+        } finally {
+          setLoading(false);
+        }
+      })();
+    }
+  }, [initialLoad, loading, tracks.length, playlist?.id]);
+
+  // Scroll speed detection
+  const handleScroll = ({ scrollOffset }) => {
+    const now = Date.now();
+    const deltaPx = Math.abs(scrollOffset - lastScrollRef.current.offset);
+    const deltaT = now - lastScrollRef.current.time;
+    const speed = deltaT ? deltaPx / deltaT : 0; // px per ms
+    lastScrollRef.current = { offset: scrollOffset, time: now };
+
+    if (speed > FAST_SCROLL_SPEED && !fastScroll) {
+      setFastScroll(true);
+    }
+    // Clear previous timer and schedule turning fastScroll off
+    clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => setFastScroll(false), 180);
+  };
+
   // Infinite scroll handler
   const handleItemsRendered = useCallback(({ visibleStopIndex }) => {
     // Only allow infinite scroll if at least one track is loaded
@@ -162,9 +221,22 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
   );
 
   // Row renderer for react-window
-  const Row = ({ index, style }) => {
-    const track = tracks[index];
-    if (!track) return null;
+  // Row renderer for react-window (memoized for performance)
+const Row = React.memo(({ index, style, data }) => {
+  const { tracks: rowTracks, fastScroll } = data;
+  const track = rowTracks[index];
+  if (!track) return null;
+
+
+  // Show lightweight placeholder while FAST scrolling
+  if (fastScroll) {
+    return (
+      <Box style={style} sx={{ height: TRACK_ROW_HEIGHT, px: 2, display: 'flex', alignItems: 'center' }}>
+        <Skeleton variant="rectangular" width="100%" height={40} />
+      </Box>
+    );
+  }
+
 
     const handlePlayClick = () => {
     // store entire playlist for global shuffle reference
@@ -285,11 +357,11 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
         </IconButton>
       </Box>
     );
-  };
+  }, areEqual);
 
   // Main layout container
   return (
-    <div className="playlist-content">
+    <div className="playlist-content" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {/* Playlist header */}
       <Box sx={{ 
         display: 'flex', 
@@ -308,35 +380,36 @@ const PlaylistTracks = ({ playlist, isQueueOpen }) => {
           style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 8, marginRight: 32 }}
         />
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
             {playlist?.title}
           </Typography>
-          <Typography variant="subtitle1" sx={{ color: 'var(--text-subdued)' }}>
-            {playlist?.description}
-          </Typography>
-          <Typography sx={{ color: 'var(--text-subdued)', mt: 1 }}>
-            {playlist?.itemCount} songs
+          <Typography sx={{ color: 'var(--text-subdued)', fontSize: '0.9rem', mt: 0.5 }}>
+            {playlist?.channelTitle} • {playlist?.itemCount} songs
           </Typography>
         </Box>
       </Box>
       
       {/* Track List (react-window) */}
-      <div className="track-list-container">
+      <Box sx={{ flex: 1, minHeight: 0, height: '100%' }}>
         <AutoSizer>
           {({ height, width }) => (
             <List
               height={height}
+              width={width}
               itemCount={tracks.length}
               itemSize={TRACK_ROW_HEIGHT}
-              width={width}
+              itemData={itemData}
+              overscanCount={12}
+              onScroll={handleScroll}
               onItemsRendered={handleItemsRendered}
+              itemKey={(index) => tracks[index]?.id || index}
               ref={listRef}
             >
               {Row}
             </List>
           )}
         </AutoSizer>
-      </div>
+      </Box>
     </div>
   );
 };
