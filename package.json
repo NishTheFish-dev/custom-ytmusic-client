@@ -42,6 +42,7 @@
     "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.2.1",
     "axios": "^1.6.7",
+    "discord-rpc": "^4.0.1",
     "electron-store": "^8.1.0",
     "googleapis": "^133.0.0",
     "node-fetch": "^2.7.0",

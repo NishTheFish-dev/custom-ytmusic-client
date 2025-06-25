@@ -37,10 +37,11 @@ import { useAudio } from '../context/AudioContext';
  * - onSearch         : (query: string) => void
  * - onToggleQueue    : () => void   (toggles the queue sidebar)
  */
-const GlobalControls = ({ onHomeClick, onSearch, onToggleQueue, onNavigateBack, onNavigateForward, canGoBack = false, canGoForward = false }) => {
+const GlobalControls = ({ onHomeClick, onSearch, onToggleQueue, onNavigateBack, onNavigateForward, canGoBack = false, canGoForward = false, onSettingsClick }) => {
   return (
     <>
       <TopControls
+        onSettingsClick={onSettingsClick}
         onHomeClick={onHomeClick}
         onSearch={onSearch}
         onNavigateBack={onNavigateBack}
@@ -56,7 +57,7 @@ const GlobalControls = ({ onHomeClick, onSearch, onToggleQueue, onNavigateBack, 
 /* -------------------------------------------------------------------------- */
 /*                              Top (Search) Bar                              */
 /* -------------------------------------------------------------------------- */
-const TopControls = ({ onHomeClick, onSearch, onNavigateBack, onNavigateForward, canGoBack, canGoForward }) => {
+const TopControls = ({ onHomeClick, onSearch, onNavigateBack, onNavigateForward, canGoBack, canGoForward, onSettingsClick }) => {
   const [searchText, setSearchText] = useState('');
 
   return (
@@ -93,6 +94,8 @@ const TopControls = ({ onHomeClick, onSearch, onNavigateBack, onNavigateForward,
         {/* Left cluster */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <IconButton
+            onClick={onSettingsClick}
+            aria-label="Open settings"
             sx={{
               color: 'var(--text-base)',
               '&:hover': { backgroundColor: 'var(--background-highlight)' },
@@ -221,6 +224,8 @@ const BottomPlayerControls = ({ onToggleQueue }) => {
     repeatMode,
     toggleShuffle,
     cycleRepeat,
+    next,
+    previous,
   } = useAudio();
 
   // toggle between total duration and time remaining
@@ -254,15 +259,14 @@ const BottomPlayerControls = ({ onToggleQueue }) => {
   };
 
   const handleNext = () => {
-    if (queue.length) {
-      const [next, ...rest] = queue;
-      setQueue(rest);
-      playTrack(next);
-    }
+    next();
   };
 
   const handlePrevious = () => {
-    seek(0);
+    if (!previous()) {
+      // fallback: restart current song
+      seek(0);
+    }
   };
 
   return (

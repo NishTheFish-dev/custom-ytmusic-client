@@ -23,6 +23,7 @@ An unofficial custom desktop client for YouTube Music built with React.js and El
 
 | Version | Date       | Highlights |
 |---------|------------|------------|
+| v0.3.3  | 2025-06-24 | • Custom desktop taskbar icon and window icon that replaces the default Electron icon  <br>• Settings icon is now functional with the keybinds settings being the only working tab for now  <br>• Keyboard shortcuts added which now control most of the playback features |
 | v0.3.2  | 2025-06-24 | • Unified video & playlist search, with songs first and playlists second  <br>• Search results clearly distinguish playlists vs songs with tags & icons  <br>• Playlist play button queues full playlist; dynamic track-count header  <br>• Added Back & Forward navigation buttons with history stack  <br>• Misc UI tweaks, bug fixes, and code cleanup |
 | v0.3.1  | 2025-06-23 | • Playlist track list performance & pagination improvements  <br>• Skeleton placeholders only during fast scrolling  <br>• Fixed black-screen crash when opening playlists  <br>• Clickable duration toggles remaining time  <br>• Misc layout tweaks & code cleanup   <br>• Fixed some bugs with the player bar buttons|
 | v0.3.0  | 2025-06-23 | • Complete UI rewrite across components, as well as making new files for each component  <br>• Enforced minimum application window size (1200×800)  <br>• Equal-height playlist, content & queue cards  <br>• Tighter spacing and structural refinements |

@@ -108,6 +108,24 @@ export const AudioProvider = ({ children }) => {
     await YouTubePlayer.setVolume(vol);
   }, []);
 
+  // keep track of previous track for history
+  const prevTrackRef = useRef(null);
+  const skipNextHistoryPushRef = useRef(false);
+
+  useEffect(() => {
+    if (skipNextHistoryPushRef.current) {
+      // Skip one push caused by a manual previous() navigation
+      skipNextHistoryPushRef.current = false;
+    } else if (prevTrackRef.current && prevTrackRef.current.id !== currentTrack?.id) {
+      playedHistoryRef.current.push(prevTrackRef.current);
+      // avoid unbounded growth – cap at 100 entries
+      if (playedHistoryRef.current.length > 100) {
+        playedHistoryRef.current.shift();
+      }
+    }
+    prevTrackRef.current = currentTrack;
+  }, [currentTrack]);
+
   // sync refs
   useEffect(() => { queueRef.current = queue; }, [queue]);
   useEffect(() => { repeatModeRef.current = repeatMode; }, [repeatMode]);
@@ -165,6 +183,43 @@ export const AudioProvider = ({ children }) => {
 
   const setFullPlaylist = (arr = []) => { fullPlaylistRef.current = arr; };
 
+  const next = useCallback(() => {
+    if (queue.length > 0) {
+      const [nextTrack, ...rest] = queue;
+      setQueue(rest);
+      playTrack(nextTrack);
+      return true;
+    } else if (repeatMode === 1 && originalQueueRef.current.length > 0) {
+      // Repeat all - start from beginning
+      const [first, ...rest] = originalQueueRef.current;
+      setQueue(rest);
+      playTrack(first);
+      return true;
+    }
+    return false;
+  }, [queue, repeatMode, playTrack, setQueue]);
+
+  const previous = useCallback(() => {
+    if (playedHistoryRef.current.length === 0) {
+      // Restart current track
+      seek(0);
+      return true;
+    }
+
+    const previousTrack = playedHistoryRef.current.pop();
+
+    // Put the current track back at the front of the queue so "next" returns
+    if (currentTrack) {
+      setQueue(prevQueue => [currentTrack, ...prevQueue]);
+    }
+
+    // Avoid immediately pushing current->history when currentTrack updates
+    skipNextHistoryPushRef.current = true;
+
+    playTrack(previousTrack);
+    return true;
+  }, [currentTrack, playTrack, setQueue]);
+
   const value = {
     currentTrack,
     isPlaying,
@@ -181,6 +236,8 @@ export const AudioProvider = ({ children }) => {
     setFullPlaylist,
     shuffle,
     repeatMode,
+    next,
+    previous,
     toggleShuffle: () => setShuffle(prev => {
       if (!prev) {
         // turning ON: snapshot current order and shuffle queue

@@ -678,12 +678,18 @@ async function createWindow() {
   // Get saved window bounds or use defaults
   const savedPreferences = preferencesStore.get('preferences') || preferencesStore.store;
   const { windowBounds, sidebarWidth } = savedPreferences;
+  
+  // Determine icon path for window/taskbar
+  const iconPath = isDev
+    ? path.join(__dirname, 'public', 'images', 'youtube-music-icon.ico')
+    : path.join(process.resourcesPath, 'images', 'youtube-music-icon.ico');
 
   mainWindow = new BrowserWindow({
     width: windowBounds.width,
     height: windowBounds.height,
     minWidth: 1400,
     minHeight: 800,
+    icon: iconPath,
     frame: true, // Keep the title bar
     titleBarStyle: 'hidden', // Hide the default title bar but keep window controls
     titleBarOverlay: {

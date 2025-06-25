@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
@@ -12,6 +13,7 @@ import ContentCard from './components/Layout/ContentCard';
 import QueueCard from './components/Layout/QueueCard';
 import MainLayout from './components/Layout/MainLayout';
 import Playlists from './components/Playlists/Playlists';
+import SettingsModal from './components/SettingsModal';
 import { playlistService } from './services/playlistService';
 import PlaylistTracks from './components/Playlists/PlaylistTracks';
 import SearchResults from './components/Search/SearchResults';
@@ -43,6 +45,9 @@ function App() {
   /* Context */
   const { currentTrack, queue, playTrack, setQueue, setFullPlaylist, shuffle } = useAudio();
 
+  // Initialize keyboard shortcuts
+  useKeyboardShortcuts();
+
   /* State */
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [googleUser, setGoogleUser] = useState(null);
@@ -54,6 +59,7 @@ function App() {
   const [showQueue, setShowQueue] = useState(true);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSettings, setShowSettings] = useState(false);
 
   /* Effects */
   useEffect(() => {
@@ -134,6 +140,7 @@ function App() {
   };
 
   const handleToggleQueue = () => setShowQueue(prev => !prev);
+  const handleToggleSettings = () => setShowSettings(prev => !prev);
 
   // Play entire playlist starting from first track
   const handlePlaylistPlay = async (playlist) => {
@@ -249,7 +256,8 @@ function App() {
             Loading...
           </Typography>
         </Box>
-      </ThemeProvider>
+            <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
+    </ThemeProvider>
     );
   }
 
@@ -264,6 +272,7 @@ function App() {
           {/* Top bar */}
           <Box className="global-controls-wrapper">
             <GlobalControls
+              onSettingsClick={handleToggleSettings}
               onHomeClick={handleHomeClick}
               onSearch={handleSearch}
               onToggleQueue={handleToggleQueue}
@@ -295,6 +304,7 @@ function App() {
           </Box>
         </Box>
       )}
+          <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
     </ThemeProvider>
   );
 }
