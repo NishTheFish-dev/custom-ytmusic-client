@@ -2,7 +2,7 @@
 
 An unofficial custom desktop client for YouTube Music built with React.js and Electron. Built from the ground up, this project aims to bring the experience of the mobile UI of YouTube Music to a desktop application, allowing for users to enjoy YouTube Music to its fullest.
 
-## Current Features
+## Features
 
 - Seamless YouTube account authentication and high-quality playback via hidden YouTube IFrame
 - PlayerBar with play/pause, previous/next, seek slider, volume control, and queue panel
@@ -10,13 +10,6 @@ An unofficial custom desktop client for YouTube Music built with React.js and El
 - Dynamic up-next queue: double-click or play any track and the remainder auto-queues
 - Global search (songs, videos, artists) with immediate playback and queue support
 - Dark-themed, responsive UI built with MUI + React
-
-## Planned Features
-
-- Discord Rich Presence – show track title, artist, progress in status
-- Download / cache tracks for offline listening
-- Equalizer & audio effects panel
-- Lyrics fetcher (YT captions / external services)
 - Settings window with hot-key customisation
 
 ## Version History
